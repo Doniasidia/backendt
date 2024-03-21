@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Client } from 'src/entity/client';
+import { Client } from 'src/admin/client/client.entity';
 import { PaymentMethod } from 'src/enums/paymentmethod';
 import { Status } from 'src/enums/status';
-import { User } from './user';
+import { User } from '../../entity/user';
 
 @Entity()
 export class Subscriber extends User{
@@ -23,6 +23,6 @@ export class Subscriber extends User{
 
   
 
-  @ManyToOne(() => Client, (client) => client.subscribers)
-  client: Client;
+ /* @ManyToOne(() => Client, (client) => client.subscribers)
+  client: Client; */
 }

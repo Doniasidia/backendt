@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, Column} from 'typeorm';
-import { Client } from 'src/entity/client';
+import { Client } from 'src/admin/client/client.entity';
 import { LoginCredentials } from 'src/entity/LoginCredentials'; 
 import { User } from './user';
 

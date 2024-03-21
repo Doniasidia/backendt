@@ -8,21 +8,24 @@ import { Invoice } from 'src/entity/invoice';
 import { Message } from 'src/entity/message';
 import { Payment } from 'src/entity/payment';
 import { Subplan } from 'src/entity/subplan';
-import { Subscription } from 'src/entity/subscription';
+import { Subscription } from 'src/client/subscription/subscription';
 import { Sessions } from 'src/entity/sessions';
-import { Subscriber } from 'src/entity/subscriber';
-import { Client } from 'src/entity/client';
+import { Subscriber } from 'src/client/subscriber/subscriber';
+import { Client } from './admin/client/client.entity';
 import { Admin } from 'src/entity/admin';
 import { User } from 'src/entity/user';
 import { LoginCredentials } from 'src/entity/LoginCredentials';
-import { ClientService } from './admin/client-management.ts/client.service';
-import { ClientController } from './admin/client-management.ts/client.controller';
-import { ClientModule } from './admin/client-management.ts/client.module';
+import { ClientService } from './admin/client/clients.service';
+import { ClientController } from './admin/client/clients.controller';
+import { ClientModule } from './admin/client/clients.module';
+
+
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    TypeOrmModule.forFeature([Client]),
+    ConfigModule.forRoot({ envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

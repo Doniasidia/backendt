@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Subscriber } from 'src/entity/subscriber';
+import { Subscriber } from 'src/client/subscriber/subscriber';
 import { Subplan } from 'src/entity/subplan';
 import { PaymentMethod } from 'src/enums/paymentmethod';
 import { Status } from 'src/enums/status';
