@@ -21,22 +21,19 @@ export class ClientController {
     return await this.clientService.createClient(body);
   }
  
-  @Delete(':id')
-  async deleteClient(@Param('id') id: number): Promise<void> {
-    try {
-      await this.clientService.deleteClient(id);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
-  
-  @Patch(':id') 
-async updateClient(@Param('id') id: number, @Body() body: ClientDTO): Promise<Client> {
+  @Patch(':id/deactivate') 
+async deactivateClient(@Param('id') id: number): Promise<Client> {
   try {
-    return await this.clientService.updateClient(id, body);
+    return await this.clientService.deactivateClient(id);
   } catch (error) {
     throw new NotFoundException(error.message);
   }
-
 }
-} 
+@Get(':id')
+  async getClientById(@Param('id') id: string): Promise<Client> {
+    return await this.clientService.getClientById(+id); 
+  }
+}
+
+
+

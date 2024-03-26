@@ -30,15 +30,16 @@ export class ClientService {
     const savedClient = await this.clientRepository.save(newClient);
     return savedClient;
   }
-  async deleteClient(id: number): Promise<void> {
+  async deactivateClient(id: number): Promise<Client> {
     const client = await this.clientRepository.findOne({ where: { id } });
     if (!client) {
       throw new NotFoundException(`Client with ID ${id} not found`);
     }
-  
+    
     client.status = Status.DEACTIVATED;
-    await this.clientRepository.save(client);
+    return await this.clientRepository.save(client);
   }
+  
 
   async updateClient(id: number, body: ClientDTO): Promise<Client> {
     const client = await this.clientRepository.findOne({ where: { id } });
@@ -66,5 +67,12 @@ export class ClientService {
     const updatedClient = await this.clientRepository.save(client);
     return updatedClient;
   }
-  
+  async getClientById(id: number): Promise<Client> {
+    const client = await this.clientRepository.findOne({ where: { id } });
+    if (!client) {
+      throw new NotFoundException(`Client with ID ${id} not found`);
+    }
+    return client;
 }
+}
+  
