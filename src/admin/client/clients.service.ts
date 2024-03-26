@@ -1,8 +1,13 @@
+// client.service.ts
+
 import {  Injectable, NotFoundException } from '@nestjs/common';
 import { Client } from './client.entity';
 import { ClientDTO } from './client.dto';
 import {  Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { Status } from 'src/enums/status';
+
 @Injectable()
 export class ClientService {
   constructor(
@@ -15,11 +20,12 @@ export class ClientService {
   }
 
   async createClient(body: ClientDTO): Promise<Client> {
+    const hashedPassword = await bcrypt.hash(body.password, 10);
     const newClient = new Client();
-    newClient.nomEtablissement = body.nomEtablissement;
+    newClient.username = body.nomEtablissement;
     newClient.email = body.email;
     newClient.telephone = body.telephone;
-    newClient.password = body.password; // Consider hashing password before saving
+    newClient.password = hashedPassword; 
     newClient.typepack = body.typepack;
     const savedClient = await this.clientRepository.save(newClient);
     return savedClient;
@@ -29,19 +35,34 @@ export class ClientService {
     if (!client) {
       throw new NotFoundException(`Client with ID ${id} not found`);
     }
-    await this.clientRepository.remove(client);
+  
+    client.status = Status.DEACTIVATED;
+    await this.clientRepository.save(client);
   }
 
   async updateClient(id: number, body: ClientDTO): Promise<Client> {
-    const client = await this.clientRepository.findOne({ where: { id } }); // Add an empty relations option
+    const client = await this.clientRepository.findOne({ where: { id } });
     if (!client) {
       throw new NotFoundException(`Client with ID ${id} not found`);
     }
-    client.nomEtablissement = body.nomEtablissement;
-    client.email = body.email;
-    client.telephone = body.telephone;
-    client.password = body.password; // Consider hashing password before saving
-    client.typepack = body.typepack;
+  
+    if (body.nomEtablissement !== undefined) {
+      client.username = body.nomEtablissement;
+    }
+    if (body.email !== undefined) {
+      client.email = body.email;
+    }
+    if (body.telephone !== undefined) {
+      client.telephone = body.telephone;
+    }
+    if (body.password !== undefined) {
+      const hashedPassword = await bcrypt.hash(body.password, 10);
+      client.password = hashedPassword;
+    }
+    if (body.typepack !== undefined) {
+      client.typepack = body.typepack;
+    }
+  
     const updatedClient = await this.clientRepository.save(client);
     return updatedClient;
   }

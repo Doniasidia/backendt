@@ -1,3 +1,5 @@
+// app.module.ts
+
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,11 +15,19 @@ import { Sessions } from 'src/entity/sessions';
 import { Subscriber } from 'src/client/subscriber/subscriber';
 import { Client } from './admin/client/client.entity';
 import { Admin } from 'src/entity/admin';
-import { User } from 'src/entity/user';
-import { LoginCredentials } from 'src/entity/LoginCredentials';
+import { User } from 'src/user/user';
+
 import { ClientService } from './admin/client/clients.service';
 import { ClientController } from './admin/client/clients.controller';
 import { ClientModule } from './admin/client/clients.module';
+import { AuthModule } from './auth/auth.module';
+import { Repository } from 'typeorm';
+import { UserRepository } from './user/user.repository';
+import { UserService } from './user/user.service';
+import { UserModule } from './user/user.module';
+import { ClientRepository } from './user/client.repository';
+import { AdminRepository } from './user/admin.repository';
+import { SubscriberRepository } from './user/subscriber.repository';
 
 
 
@@ -46,16 +56,16 @@ import { ClientModule } from './admin/client/clients.module';
           Subscriber,
           Client,
           Admin,
-          User, LoginCredentials
+          User
         ],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
-    ClientModule,
+    ClientModule,AuthModule,UserModule,
   ],
   controllers: [AppController, ClientController],
-  providers: [AppService, ClientService],
+  providers: [AppService, ClientService, Repository,UserRepository,UserService,ClientRepository,AdminRepository,SubscriberRepository],
 })
 export class AppModule {}
 

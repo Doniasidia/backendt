@@ -1,22 +1,13 @@
-// client.dto.ts
-
 import { IsNotEmpty, IsEmail, IsPhoneNumber } from 'class-validator';
-
-export class ClientDTO {
-  @IsNotEmpty()
-  nomEtablissement: string;
-
-  
+export class SignInDto {
   @IsEmail()
   email: string;
 
   
-  @IsPhoneNumber('TN') 
+  @IsPhoneNumber('TN') // Assuming you're using Tunisian phone numbers
   telephone: string;
 
   @IsNotEmpty()
   password: string;
-
-  @IsNotEmpty()
-  typepack: string;
-}
+  }
+  

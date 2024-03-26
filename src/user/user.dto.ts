@@ -2,9 +2,9 @@
 
 import { IsNotEmpty, IsEmail, IsPhoneNumber } from 'class-validator';
 
-export class ClientDTO {
+export class UserDTO {
   @IsNotEmpty()
-  nomEtablissement: string;
+  username: string;
 
   
   @IsEmail()
@@ -17,6 +17,6 @@ export class ClientDTO {
   @IsNotEmpty()
   password: string;
 
-  @IsNotEmpty()
-  typepack: string;
+ 
+
 }

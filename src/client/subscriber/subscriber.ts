@@ -1,28 +1,19 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Client } from 'src/admin/client/client.entity';
 import { PaymentMethod } from 'src/enums/paymentmethod';
-import { Status } from 'src/enums/status';
-import { User } from '../../entity/user';
+import { User } from '@user/user';
+import { Role } from 'src/enums/role';
 
 @Entity()
 export class Subscriber extends User{
   @PrimaryGeneratedColumn()
   id: number;
-  
-
+  @Column()
+  FirstName: string;
+  @Column()
+  LastName: string;
   @Column({ type: "enum", enum: PaymentMethod})
   payment_method: PaymentMethod;
+  @Column({ type: "enum", enum: Role, default: Role.SUBSCRIBER })
+  role?: Role;
 
-  @Column({ type: "enum", enum: Status})
-  status: Status;
-
-  @Column()
-  inscription_date: Date;
-  @Column({ unique: true })
-  email? : string;
-
-  
-
- /* @ManyToOne(() => Client, (client) => client.subscribers)
-  client: Client; */
 }

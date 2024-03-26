@@ -10,6 +10,15 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+      "paths": {
+          "@admin/*": ["src/admin/*"],
+          "@user/*": ["src/user/*"],
+          "@auth/*": ["src/auth/*"],
+          "@client/*": ["src/client/*"],
+          "@entity/*": ["src/entity/*"],
+          "@enums/*": ["src/enums/*"]
+        },
+
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
