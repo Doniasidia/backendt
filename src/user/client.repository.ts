@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { Client } from 'src/admin/client/client.entity';
+import { Client } from '@admin/client/client.entity';
 
 @Injectable()
 export class ClientRepository {

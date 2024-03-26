@@ -16,7 +16,8 @@
           "@auth/*": ["src/auth/*"],
           "@client/*": ["src/client/*"],
           "@entity/*": ["src/entity/*"],
-          "@enums/*": ["src/enums/*"]
+          "@enums/*": ["src/enums/*"],
+          "@src/*": ["src/*"]
         },
 
     "incremental": true,

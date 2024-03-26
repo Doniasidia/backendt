@@ -1,33 +1,33 @@
 // app.module.ts
 
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AppController } from '@src/app.controller';
+import { AppService } from '@src/app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config'; 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Calendar } from 'src/entity/calendar';
-import { Invoice } from 'src/entity/invoice';
-import { Message } from 'src/entity/message';
-import { Payment } from 'src/entity/payment';
-import { Subplan } from 'src/entity/subplan';
-import { Subscription } from 'src/client/subscription/subscription';
-import { Sessions } from 'src/entity/sessions';
-import { Subscriber } from 'src/client/subscriber/subscriber';
-import { Client } from './admin/client/client.entity';
-import { Admin } from 'src/entity/admin';
-import { User } from 'src/user/user';
-
-import { ClientService } from './admin/client/clients.service';
-import { ClientController } from './admin/client/clients.controller';
-import { ClientModule } from './admin/client/clients.module';
-import { AuthModule } from './auth/auth.module';
+import { Calendar } from '@entity/calendar.entity';
+import { Invoice } from '@entity/invoice.entity';
+import { Message } from '@entity/message.entity';
+import { Payment } from '@entity/payment.entity';
+import { Subplan } from '@entity/subplan.entity';
+import { Subscription } from '@client/subscription/subscription.entity';
+import { Sessions } from '@entity/sessions.entity';
+import { Subscriber } from '@client/subscriber/subscriber.entity';
+import { Client } from '@admin/client/client.entity';
+import { Admin } from '@entity/admin.entity';
+import { User } from '@user/user.entity';
+import { ClientService } from '@admin/client/clients.service';
+import { ClientController } from '@admin/client/clients.controller';
+import { ClientModule } from '@admin/client/clients.module';
+import { AuthModule } from '@auth/auth.module';
 import { Repository } from 'typeorm';
-import { UserRepository } from './user/user.repository';
-import { UserService } from './user/user.service';
-import { UserModule } from './user/user.module';
-import { ClientRepository } from './user/client.repository';
-import { AdminRepository } from './user/admin.repository';
-import { SubscriberRepository } from './user/subscriber.repository';
+import { UserRepository } from '@user/user.repository';
+import { UserService } from '@user/user.service';
+import { UserModule } from '@user/user.module';
+import { ClientRepository } from '@user/client.repository';
+import { AdminRepository } from '@user/admin.repository';
+import { SubscriberRepository } from '@user/subscriber.repository';
+
 
 
 

@@ -1,9 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany} from 'typeorm';
-
-import { Role } from 'src/enums/role';
-import { Message } from '../entity/message';
-import { Status } from 'src/enums/status';
-import { Client } from 'src/admin/client/client.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany} from 'typeorm'
+import { Status } from '@enums/status';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()

@@ -1,17 +1,8 @@
-import {
-    Body,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Post,
-    Request,
-    UseGuards
-  } from '@nestjs/common';
-  import { AuthGuard } from './auth.guard';
-  import { AuthService } from './auth.service';
-import { SignInDto } from './signInDto';
-import { Role } from 'src/enums/role';
+import {Body,Controller,Get,HttpCode,HttpStatus,Post,Request,UseGuards} from '@nestjs/common';
+import { AuthGuard } from '@auth/auth.guard';
+import { AuthService } from '@auth/auth.service';
+import { SignInDto } from '@auth/signInDto';
+import { Role } from '@enums/role';
   
   
   @Controller('auth')

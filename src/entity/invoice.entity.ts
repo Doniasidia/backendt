@@ -1,4 +1,4 @@
-import { PaymentMethod } from 'src/enums/paymentmethod';
+import { PaymentMethod } from '@enums/paymentmethod';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()

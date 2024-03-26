@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, Column} from 'typeorm';
 
-import { User } from '../user/user';
-import { Role } from 'src/enums/role';
+import { User } from '@user/user.entity';
+import { Role } from '@enums/role';
 
 @Entity()
 export class Admin extends User{

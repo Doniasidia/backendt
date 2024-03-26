@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany } from 'typeorm';
-import { Client } from 'src/admin/client/client.entity';
+import { Client } from '@admin/client/client.entity';
 
 @Entity()
 export class Subplan{

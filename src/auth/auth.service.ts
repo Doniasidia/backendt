@@ -1,12 +1,12 @@
 // auth.service.ts
 
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '@user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from 'src/enums/role';
-import { ClientRepository } from 'src/user/client.repository';
-import { AdminRepository } from 'src/user/admin.repository';
-import { SubscriberRepository } from 'src/user/subscriber.repository';
+import { Role } from '@enums/role';
+import { ClientRepository } from '@user/client.repository';
+import { AdminRepository } from '@user/admin.repository';
+import { SubscriberRepository } from '@user/subscriber.repository';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()

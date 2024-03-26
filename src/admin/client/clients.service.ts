@@ -1,12 +1,12 @@
 // client.service.ts
 
 import {  Injectable, NotFoundException } from '@nestjs/common';
-import { Client } from './client.entity';
-import { ClientDTO } from './client.dto';
+import { Client } from '@admin/client/client.entity';
+import { ClientDTO } from '@admin/client/client.dto';
 import {  Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Status } from 'src/enums/status';
+import { Status } from '@enums/status';
 
 @Injectable()
 export class ClientService {

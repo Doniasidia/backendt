@@ -1,8 +1,8 @@
 // client.entity.ts
 
 
-import { User } from "src/user/user";
-import { Role } from "src/enums/role";
+import { User } from "@user/user.entity";
+import { Role } from "@enums/role";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

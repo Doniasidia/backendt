@@ -1,9 +1,9 @@
 // client.controller.ts
 
 import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
-import { Client } from './client.entity';
-import { ClientService } from './clients.service';
-import { ClientDTO } from './client.dto';
+import { Client } from '@admin/client/client.entity';
+import { ClientService } from '@admin/client/clients.service';
+import { ClientDTO } from '@admin/client/client.dto';
 
 
 

@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { Subscriber } from 'src/client/subscriber/subscriber';
+import { Subscriber } from '@client/subscriber/subscriber.entity';
 @Injectable()
 export class SubscriberRepository {
   private subscriberRepository: Repository<Subscriber>;

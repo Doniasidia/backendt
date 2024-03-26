@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { PaymentMethod } from 'src/enums/paymentmethod';
-import { User } from '@user/user';
-import { Role } from 'src/enums/role';
+import { PaymentMethod } from '@enums/paymentmethod';
+import { User } from '@user/user.entity';
+import { Role } from '@enums/role';
 
 @Entity()
 export class Subscriber extends User{

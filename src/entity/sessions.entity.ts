@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Calendar } from 'src/entity/calendar';
+import { Calendar } from '@entity/calendar.entity';
 
 @Entity()
 export class Sessions {

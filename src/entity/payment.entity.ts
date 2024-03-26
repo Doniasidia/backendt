@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Subscription } from 'src/client/subscription/subscription';
-import { PaymentMethod } from 'src/enums/paymentmethod';
-import { Status } from 'src/enums/status';
+import { PaymentMethod } from '@enums/paymentmethod';
+import { Status } from '@enums/status';
 
 @Entity()
 export class Payment {
@@ -20,8 +19,6 @@ export class Payment {
   @Column({ type: "enum", enum: Status})
   status: Status;
 
-  @ManyToOne(() => Subscription, (subscription) => subscription.id)
-  subscription: Subscription;
-
+ 
   
 }
