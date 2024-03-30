@@ -1,13 +1,16 @@
-import { IsNotEmpty, IsEmail, IsPhoneNumber } from 'class-validator';
+import { IsNotEmpty, IsEmail, IsPhoneNumber, IsOptional, IsString } from 'class-validator';
 export class SignInDto {
+  @IsOptional()
   @IsEmail()
   email: string;
 
-  
-  @IsPhoneNumber('TN') // Assuming you're using Tunisian phone numbers
+
+  @IsOptional()
+  @IsPhoneNumber('TN')
   telephone: string;
 
   @IsNotEmpty()
+  @IsString()
   password: string;
   }
   

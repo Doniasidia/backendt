@@ -33,6 +33,15 @@ async deactivateClient(@Param('id') id: number): Promise<Client> {
   async getClientById(@Param('id') id: string): Promise<Client> {
     return await this.clientService.getClientById(+id); 
   }
+
+@Patch(':id/status')
+async updateClientStatus(@Param('id') id: number, @Body() body: { status: string }): Promise<Client> {
+  try {
+    return await this.clientService.updateClientStatus(id, body.status);
+  } catch (error) {
+    throw new NotFoundException(error.message);
+  }
+}
 }
 
 

@@ -12,6 +12,6 @@ export class Client extends User{
   @Column()
   typepack: string;
   @Column({ type: "enum", enum: Role, default: Role.CLIENT })
-  role?: Role;
+  role: Role;
 }
  

@@ -19,19 +19,19 @@ export class AuthService {
     private subscriberRepository: SubscriberRepository,
   ) {}
 
-  async signIn(email: string, password: string): Promise<{ access_token: string, role?: Role }> {
+  async signIn(emailOrTelephone: string, password: string): Promise<{ access_token: string, role?: Role, redirectTo: string }> {
     let user;
 
     
-    user = await this.userService.findOneByEmailByEmailOrTelephone(email);
+    user = await this.userService.findOneByEmailOrTelephone(emailOrTelephone);
     if (!user) {
-      user = await this.clientRepository.findOneByEmailOrTelephone(email);
+      user = await this.clientRepository.findOneByEmailOrTelephone(emailOrTelephone);
     }
     if (!user) {
-      user = await this.adminRepository.findOneByEmailOrTelephone(email);
+      user = await this.adminRepository.findOneByEmailOrTelephone(emailOrTelephone);
     }
     if (!user) {
-      user = await this.subscriberRepository.findOneByEmailOrTelephone(email);
+      user = await this.subscriberRepository.findOneByEmailOrTelephone(emailOrTelephone);
     }
 
     // If user is not found in any table, throw UnauthorizedException
@@ -43,6 +43,7 @@ export class AuthService {
     let isPasswordValid = false;
 
     if (user.password.startsWith('$2b$')) {
+      
         // Password is already hashed
         isPasswordValid = await bcrypt.compare(password, user.password);
     } else {
@@ -60,7 +61,7 @@ export class AuthService {
         redirectTo = '/admin/dashboard';
         break;
       case Role.CLIENT:
-        redirectTo = 'http://localhost:3000/admin/dashboard';
+        redirectTo = '/client/dashboard';
         break;
       case Role.SUBSCRIBER:
         redirectTo = '/subscriber/dashboard';
@@ -75,6 +76,7 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
       role: user.role,
+      redirectTo: redirectTo,
     };
   }
 }

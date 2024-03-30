@@ -74,5 +74,19 @@ export class ClientService {
     }
     return client;
 }
+async updateClientStatus(id: number, status: string): Promise<Client> {
+  const client = await this.clientRepository.findOne({ where: { id } });
+  if (!client) {
+    throw new NotFoundException(`Client with ID ${id} not found`);
+  }
+
+  // Validate status
+  if (status !== 'activated' && status !== 'deactivated') {
+    throw new NotFoundException(`Invalid status: ${status}`);
+  }
+
+  client.status = status === 'activated' ? Status.ACTIVATED : Status.DEACTIVATED;
+  return await this.clientRepository.save(client);
+}
 }
   

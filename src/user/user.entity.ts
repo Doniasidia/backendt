@@ -14,7 +14,7 @@ export class User {
   password: string;
  
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED})
-  status?: Status;
+  status: Status;
 
  
 }
