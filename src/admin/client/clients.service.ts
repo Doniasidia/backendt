@@ -19,14 +19,14 @@ export class ClientService {
     return await this.clientRepository.find();
   }
 
-  async createClient(body: ClientDTO): Promise<Client> {
-    const hashedPassword = await bcrypt.hash(body.password, 10);
+  async createClient(clientDTO: ClientDTO): Promise<Client> {
+    const hashedPassword = await bcrypt.hash(clientDTO.password, 10);
     const newClient = new Client();
-    newClient.username = body.nomEtablissement;
-    newClient.email = body.email;
-    newClient.telephone = body.telephone;
+    newClient.username = clientDTO.nomEtablissement;
+    newClient.email = clientDTO.email;
+    newClient.telephone = clientDTO.telephone;
     newClient.password = hashedPassword; 
-    newClient.typepack = body.typepack;
+    newClient.typepack = clientDTO.typepack;
     const savedClient = await this.clientRepository.save(newClient);
     return savedClient;
   }
