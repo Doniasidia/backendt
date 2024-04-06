@@ -16,7 +16,7 @@ export class Subscriber{
   @Column({ nullable: true, unique: true }) 
   email: string | null;
 
-  @Column()
+  @Column({unique: true})
   telephone: string; 
 
 

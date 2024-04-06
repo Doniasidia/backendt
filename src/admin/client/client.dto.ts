@@ -4,7 +4,7 @@ import { IsNotEmpty, IsEmail, IsPhoneNumber } from 'class-validator';
 
 export class ClientDTO {
   @IsNotEmpty()
-  nomEtablissement: string;
+  username: string;
 
   
   @IsEmail()

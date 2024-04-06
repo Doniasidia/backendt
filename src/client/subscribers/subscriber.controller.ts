@@ -48,4 +48,8 @@ async updateSubscriberStatus(@Param('id') id: number, @Body() body: { status: st
     throw new NotFoundException(error.message);
   }
 }
+@Get('search/:telephone')
+    async searchSubscriberByTelephone(@Param('telephone') telephone: string): Promise<Subscriber | null> {
+        return await this.subscriberService.findSubscriberByTelephone(telephone);
+    }
 }

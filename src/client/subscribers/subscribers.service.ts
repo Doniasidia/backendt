@@ -99,4 +99,7 @@ async updateSubscriberStatus(id: number, status: string): Promise<Subscriber> {
   subscriber.status = status === 'activated' ? Status.ACTIVATED : Status.DEACTIVATED;
   return await this.subscriberRepository.save(subscriber);
 }
+async findSubscriberByTelephone(telephone: string): Promise<Subscriber | null> {
+  return await this.subscriberRepository.findOne({ where: { telephone } });
+}
 }

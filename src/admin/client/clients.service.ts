@@ -22,7 +22,7 @@ export class ClientService {
   async createClient(clientDTO: ClientDTO): Promise<Client> {
     const hashedPassword = await bcrypt.hash(clientDTO.password, 10);
     const newClient = new Client();
-    newClient.username = clientDTO.nomEtablissement;
+    newClient.username = clientDTO.username;
     newClient.email = clientDTO.email;
     newClient.telephone = clientDTO.telephone;
     newClient.password = hashedPassword; 
@@ -47,8 +47,8 @@ export class ClientService {
       throw new NotFoundException(`Client with ID ${id} not found`);
     }
   
-    if (body.nomEtablissement !== undefined) {
-      client.username = body.nomEtablissement;
+    if (body.username !== undefined) {
+      client.username = body.username;
     }
     if (body.email !== undefined) {
       client.email = body.email;
