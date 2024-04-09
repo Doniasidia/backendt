@@ -29,10 +29,12 @@ import { SubscriberRepository } from '@user/subscriber.repository';
 import { PlansController } from '@client/plans/plans.controller';
 import { PlansService } from '@client/plans/plans.service';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
-import { SubscriberController } from '@client/subscribers/subscriber.controller';
+import { SubscriberController } from '@client/subscribers/subscribers.controller';
 import { SubscriberModule } from '@client/subscribers/subscribers.module';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
-
+import { GroupesService } from '@client/groupes/groupes.service'; 
+import { Groupe } from '@client/groupes/groupes.entity';
+import { GroupesController } from '@client/groupes/groupes.controller';
 
 
 
@@ -41,7 +43,7 @@ import { Subscriber } from '@client/subscribers/subscribers.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Client,Plan , 
-      Subscriber
+      Subscriber , Groupe
     ]),
     ConfigModule.forRoot({ envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
@@ -60,6 +62,7 @@ import { Subscriber } from '@client/subscribers/subscribers.entity';
           Payment,
           Sessions,
           Plan,
+          Groupe,
           Subscription,
           Subscriber,
           Client,
@@ -74,10 +77,10 @@ import { Subscriber } from '@client/subscribers/subscribers.entity';
     SubscriberModule
   ],
   controllers: [AppController, ClientController,PlansController
-   ,SubscriberController
+   ,SubscriberController ,GroupesController
    ],
   providers: [AppService, ClientService, Repository,UserRepository,UserService,ClientRepository,AdminRepository, PlansService, Plan
-  ,SubscriberService,SubscriberRepository
+  ,SubscriberService,SubscriberRepository,GroupesService,Groupe
   ],
 })
 export class AppModule {}
