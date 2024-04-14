@@ -9,18 +9,15 @@ export class SubscriberDTO {
   @IsNotEmpty()
   @IsString()
   prenom: string;
-  
+    
   @IsOptional()
   @IsEmail()
   email: string | undefined;
 
   @IsNotEmpty()
   @IsPhoneNumber('TN') 
-  telephone: string;
+  telephone: string;
 
 
 
-  @IsNotEmpty()
-  @IsString()
-  enLigne: string;
 }

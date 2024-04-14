@@ -16,17 +16,22 @@ export class Plan{
   @Column({ type: 'decimal', precision: 10, scale: 1 }) 
   amount: number;
 
-  @Column()
-  duration: number; 
+  @Column({ type: 'time', nullable: true })
+  duration: string;
+   
   @Column()
   nbrseance: number; 
   @Column()
   enligne: string; 
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED})
-  status: Status;
+  status: Status;
 
 
+  @Column() 
+  startDate: Date;
 
+  @Column() 
+  endDate: Date;
 
 
 }

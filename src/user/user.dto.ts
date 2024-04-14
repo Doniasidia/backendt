@@ -1,22 +1,17 @@
-// client.dto.ts
+// user.dto.ts
 
-import { IsNotEmpty, IsEmail, IsPhoneNumber } from 'class-validator';
+import { IsNotEmpty, IsEmail, IsPhoneNumber ,IsOptional} from 'class-validator';
 
 export class UserDTO {
   @IsNotEmpty()
   username: string;
 
-  
+  @IsOptional()
   @IsEmail()
   email: string;
 
-  
-  @IsPhoneNumber('TN') 
-  telephone: string;
-
   @IsNotEmpty()
-  password: string;
-
- 
+  @IsPhoneNumber('TN') 
+  telephone: string;
 
 }

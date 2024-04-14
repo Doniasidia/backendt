@@ -25,6 +25,8 @@ export class PlansService {
     newPlan.duration = planDTO.duration; 
     newPlan.nbrseance = planDTO.nbrseance;
     newPlan.enligne = planDTO.enligne;
+    newPlan.startDate = planDTO.startDate;
+    newPlan.endDate = planDTO.endDate;
     const savedPlan = await this.planRepository.save(newPlan);
     return savedPlan;
     
@@ -47,14 +49,14 @@ export class PlansService {
   async getPlanById(id: number): Promise<Plan> {
     const plan = await this.planRepository.findOne({ where: { id } });
     if (!plan) {
-      throw new NotFoundException(`Plan with ID ${id} not found`);
+      throw new NotFoundException(`Client with ID ${id} not found`);
     }
     return plan;
 }
 async updatePlanStatus(id: number, status: string): Promise<Plan> {
   const Plan = await this.planRepository.findOne({ where: { id } });
   if (!Plan) {
-    throw new NotFoundException(`Plan with ID ${id} not found`);
+    throw new NotFoundException(`Client with ID ${id} not found`);
   }
 
   // Validate status
@@ -69,7 +71,7 @@ async updatePlanStatus(id: number, status: string): Promise<Plan> {
 async updatePlan(id: number, body: PlanDTO): Promise<Plan> {
   const plan = await this.planRepository.findOne({ where: { id } });
   if (!plan) {
-    throw new NotFoundException(`Plan with ID ${id} not found`);
+    throw new NotFoundException(`Client with ID ${id} not found`);
   }
 
   if (body.name !== undefined) {
@@ -91,7 +93,12 @@ async updatePlan(id: number, body: PlanDTO): Promise<Plan> {
   if (body.enligne !== undefined) {
     plan.enligne = body.enligne;
   }
-
+  if (body.startDate !== undefined) {
+    plan.startDate = body.startDate;
+  }
+  if (body.endDate !== undefined) {
+    plan.endDate = body.endDate;
+  }
   const updatedPlan = await this.planRepository.save(plan);
   return updatedPlan;
 }

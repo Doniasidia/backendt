@@ -28,8 +28,7 @@ export class SubscriberService {
     newSubscriber.email = subscriberDTO.email;
     newSubscriber.telephone = subscriberDTO.telephone;
    
-    //newSubscriber.password = hashedPassword; 
-    newSubscriber.enLigne = subscriberDTO.enLigne;
+ 
     const savedSubscriber = await this.subscriberRepository.save(newSubscriber);
     return savedSubscriber;
   }
@@ -71,9 +70,7 @@ export class SubscriberService {
       const hashedPassword = await bcrypt.hash(body.password, 10);
       subscriber.password = hashedPassword;
     }*/
-    if (body.enLigne !== undefined) {
-      subscriber.enLigne = body.enLigne;
-    }
+   
   
     const updatedSubscriber = await this.subscriberRepository.save(subscriber);
     return updatedSubscriber;
@@ -102,4 +99,5 @@ async updateSubscriberStatus(id: number, status: string): Promise<Subscriber> {
 async findSubscriberByTelephone(telephone: string): Promise<Subscriber | null> {
   return await this.subscriberRepository.findOne({ where: { telephone } });
 }
+
 }

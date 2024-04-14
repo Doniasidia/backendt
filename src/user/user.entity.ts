@@ -1,3 +1,4 @@
+//user.entity
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany} from 'typeorm'
 import { Status } from '@enums/status';
 @Entity()
@@ -6,15 +7,14 @@ export class User {
   id: number;
   @Column()
   username: string;
-  @Column({ unique: true })
-  email: string;
+  @Column({ nullable: true, unique: true }) 
+  email: string | null;
   @Column({ unique: true })
   telephone : string;
-  @Column()
-  password: string;
+ 
  
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED})
-  status: Status;
+  status: Status;
 
- 
+ 
 }

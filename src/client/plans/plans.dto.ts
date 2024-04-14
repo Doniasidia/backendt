@@ -1,5 +1,5 @@
 //plans.dto
-import {  IsNotEmpty,  IsNumber,  IsString } from 'class-validator';
+import {  IsNotEmpty,  IsNumber,  IsString ,IsDate, IsOptional } from 'class-validator';
 
 
 export class PlanDTO {
@@ -18,8 +18,9 @@ export class PlanDTO {
   
 
   @IsNotEmpty()
-  @IsNumber()
-  duration: number;
+  @IsString()
+  duration: string;
+  
 
   @IsNotEmpty()
   @IsNumber()
@@ -27,7 +28,12 @@ export class PlanDTO {
 
   @IsNotEmpty()
   @IsString()
-  enligne: string;
+  enligne: string;
 
+  @IsNotEmpty()
+  startDate: Date;
+
+@IsNotEmpty()
+  endDate: Date;
 
 }
