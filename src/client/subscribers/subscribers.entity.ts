@@ -21,8 +21,7 @@ export class Subscriber{
 
 
 
-  @Column()
-  enLigne: string; 
+  
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED})
   status: Status;
 

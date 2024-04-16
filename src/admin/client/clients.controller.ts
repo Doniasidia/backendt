@@ -15,7 +15,7 @@ export class ClientController {
   async getAllClients(): Promise<Client[]> {
     return await this.clientService.findAll();
   }
-  @Put(':id')
+  @Patch(':id')
   async updateClient(@Param('id') id: number, @Body() ClientDTO: ClientDTO): Promise<Client> {
     return await this.clientService.updateClient(id, ClientDTO);
   }

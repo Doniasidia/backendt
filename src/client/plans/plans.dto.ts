@@ -30,10 +30,10 @@ export class PlanDTO {
   @IsString()
   enligne: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   startDate: Date;
 
-@IsNotEmpty()
+@IsOptional()
   endDate: Date;
 
 }

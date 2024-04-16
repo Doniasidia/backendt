@@ -19,7 +19,7 @@ export class PlansController {
     return await this.plansService.createPlan(PlanDTO);
   }
 
-  @Put(':id')
+  @Patch(':id')
   async updatePlan(@Param('id') id: number, @Body() PlanDTO: PlanDTO): Promise<Plan> {
     return await this.plansService.updatePlan(id, PlanDTO);
   }

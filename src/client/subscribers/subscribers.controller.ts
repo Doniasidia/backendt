@@ -17,7 +17,7 @@ export class SubscriberController {
   async getAllSubscribers(): Promise<Subscriber[]> {
     return await this.subscriberService.findAll();
   }
-  @Put(':id')
+  @Patch(':id')
   async updateSubscriber(@Param('id') id: number, @Body() SubscriberDTO: SubscriberDTO): Promise<Subscriber> {
     return await this.subscriberService.updateSubscriber(id, SubscriberDTO);
   }

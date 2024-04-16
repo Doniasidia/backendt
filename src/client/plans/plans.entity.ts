@@ -27,11 +27,12 @@ export class Plan{
   status: Status;
 
 
-  @Column() 
-  startDate: Date;
+  @Column({type: "date",nullable:true }) 
+startDate?: Date;
 
-  @Column() 
-  endDate: Date;
+@Column({ type: "date",nullable:true }) 
+endDate?: Date;
+
 
 
 }
