@@ -7,13 +7,17 @@ import {  Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Status } from '@enums/status';
 import * as bcrypt from 'bcrypt';
-
-
+import { Groupe } from '@client/groupes/groupes.entity';
+import { Plan } from '@client/plans/plans.entity';
 @Injectable()
 export class SubscriberService {
   constructor(
     @InjectRepository(Subscriber)
     private readonly subscriberRepository: Repository<Subscriber>,
+    @InjectRepository(Groupe) // <-- Add @InjectRepository here
+    private readonly groupeRepository: Repository<Groupe>,
+    @InjectRepository(Plan)
+    private readonly planRepository: Repository<Plan>,
   ) {}
 
   async findAll(): Promise<Subscriber[]> {
@@ -21,17 +25,31 @@ export class SubscriberService {
   }
 
   async createSubscriber(subscriberDTO: SubscriberDTO): Promise<Subscriber> {
-   // const hashedPassword = await bcrypt.hash(body.password, 10);
-    const newSubscriber = new Subscriber();
-    newSubscriber.username = subscriberDTO.nom;
-    newSubscriber.FirstName = subscriberDTO.prenom;
-    newSubscriber.email = subscriberDTO.email;
-    newSubscriber.telephone = subscriberDTO.telephone;
-   
- 
-    const savedSubscriber = await this.subscriberRepository.save(newSubscriber);
-    return savedSubscriber;
-  }
+    try {
+        // Look up the groupId and planId based on their names
+        const groupeId = await this.groupeRepository.findOne({ where: { name: subscriberDTO.groupName } });
+        const planId = await this.planRepository.findOne({ where: { name: subscriberDTO.planName } });
+
+        // Create a new subscriber object and set its properties
+        const newSubscriber = new Subscriber();
+        newSubscriber.username = subscriberDTO.nom;
+        newSubscriber.FirstName = subscriberDTO.prenom;
+        newSubscriber.email = subscriberDTO.email;
+        newSubscriber.telephone = subscriberDTO.telephone;
+        newSubscriber.groupeId = groupeId?.id; 
+        newSubscriber.planId = planId?.id; 
+
+        // Save the new subscriber to the database
+        const savedSubscriber = await this.subscriberRepository.save(newSubscriber);
+        
+        return savedSubscriber;
+    } catch (error) {
+        // Handle any errors that occur during the process
+        console.error('Error creating subscriber:', error);
+        throw error; // Optionally, you can throw the error to be handled by the caller
+    }
+}
+
   async deactivateSubscriber(id: number): Promise<Subscriber> {
     const subscriber = await this.subscriberRepository.findOne({ where: { id } });
     if (!subscriber) {

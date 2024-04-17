@@ -18,6 +18,10 @@ export class SubscriberDTO {
   @IsPhoneNumber('TN') 
   telephone: string;
 
+ 
+  groupName: string;
 
+  
+  planName: string;
 
 }

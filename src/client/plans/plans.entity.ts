@@ -1,6 +1,7 @@
 //plans entity
 import { Status } from '@enums/status';
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Subscriber } from '@client/subscribers/subscribers.entity';
 
 @Entity()
 export class Plan{
@@ -32,7 +33,8 @@ startDate?: Date;
 
 @Column({ type: "date",nullable:true }) 
 endDate?: Date;
-
+@OneToMany(() => Subscriber, subscriber => subscriber.plan) // One plan has many subscribers
+  subscribers: Subscriber[]; 
 
 
 }

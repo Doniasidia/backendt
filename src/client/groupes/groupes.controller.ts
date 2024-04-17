@@ -19,9 +19,13 @@ export class GroupesController {
     return await this.groupesService.createGroupe(GroupeDTO);
   }
 
-  @Patch(':id')
+  @Put(':id')
   async updateGroupe(@Param('id') id: number, @Body() GroupeDTO: GroupeDTO): Promise<Groupe> {
+   try{
     return await this.groupesService.updateGroupe(id, GroupeDTO);
+   }catch (error){
+    throw new NotFoundException(error.message);
+   }
   }
   @Patch(':id/deactivate') 
   async deactivateGroupe(@Param('id') id: number): Promise<Groupe> {
