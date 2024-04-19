@@ -1,6 +1,6 @@
 // client.controller.ts
 
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
 import { Client } from '@admin/client/client.entity';
 import { ClientService } from '@admin/client/clients.service';
 import { ClientDTO } from '@admin/client/client.dto';
@@ -13,16 +13,29 @@ export class ClientController {
   
   @Get()
   async getAllClients(): Promise<Client[]> {
-    return await this.clientService.findAll();
+    try {
+      return await this.clientService.findAll();
+    } catch (error) {
+      throw new NotFoundException("Unable to fetch clients.");
+    }
   }
+ 
   @Patch(':id')
-  async updateClient(@Param('id') id: number, @Body() ClientDTO: ClientDTO): Promise<Client> {
-    return await this.clientService.updateClient(id, ClientDTO);
+  async updateClient(@Param('id') id: number, @Body() clientDTO: ClientDTO): Promise<Client> {
+    try {
+      return await this.clientService.updateClient(id, clientDTO);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
   
   @Post()
   async createClient(@Body() body: ClientDTO): Promise<Client> {
-    return await this.clientService.createClient(body);
+    try {
+      return await this.clientService.createClient(body);
+    } catch (error) {
+      throw new NotFoundException("Unable to create client.");
+    }
   }
  
   @Patch(':id/deactivate') 
@@ -34,9 +47,13 @@ async deactivateClient(@Param('id') id: number): Promise<Client> {
   }
 }
 @Get(':id')
-  async getClientById(@Param('id') id: string): Promise<Client> {
-    return await this.clientService.getClientById(+id); 
+async getClientById(@Param('id') id: string): Promise<Client> {
+  try {
+    return await this.clientService.getClientById(+id);
+  } catch (error) {
+    throw new NotFoundException(error.message || "Client not found.");
   }
+}
 
 @Patch(':id/status')
 async updateClientStatus(@Param('id') id: number, @Body() body: { status: string }): Promise<Client> {
@@ -44,9 +61,6 @@ async updateClientStatus(@Param('id') id: number, @Body() body: { status: string
     return await this.clientService.updateClientStatus(id, body.status);
   } catch (error) {
     throw new NotFoundException(error.message);
-  }
+  }
 }
 }
-
-
-

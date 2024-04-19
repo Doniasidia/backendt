@@ -1,7 +1,8 @@
 //groupes entity
 import { Status } from '@enums/status';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
+import { Plan } from '@client/plans/plans.entity';
 
 @Entity()
 export class Groupe{
@@ -11,11 +12,12 @@ export class Groupe{
   @Column ({unique: true})
   name: string;
 
-  @Column({unique: true})
-  plan: string;
 
-  @Column()
-  nbrab: number; 
+
+  @Column({ nullable: true }) // Add planId column
+  planId: number;
+  @ManyToOne(() => Plan, plan => plan.subscribers) // Many subscribers belong to one plan
+  plan: Plan;
  
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED})
   status: Status;

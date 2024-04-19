@@ -1,5 +1,5 @@
 //groupes.dto
-import {  IsNotEmpty,  IsNumber,  IsString } from 'class-validator';
+import {  IsNotEmpty,  IsNumber,  IsString ,IsInt} from 'class-validator';
 
 
 export class GroupeDTO {
@@ -8,14 +8,10 @@ export class GroupeDTO {
   @IsString()
   name: string;
 
-  @IsNotEmpty()
-  @IsString()
-  plan: string;
+  
 
-  @IsNotEmpty()
-  @IsNumber()
-  nbrab: number;
+  planName: string;
 
 
-
+  
 }

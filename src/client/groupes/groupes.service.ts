@@ -5,12 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GroupeDTO} from '@client/groupes/groupes.dto'; 
 import { Groupe } from '@client/groupes/groupes.entity';
 import { Status } from '@enums/status';
+import { Plan } from '@client/plans/plans.entity';
 
 @Injectable()
 export class GroupesService {
   constructor(
     @InjectRepository(Groupe)
     private readonly groupeRepository: Repository<Groupe>,
+    @InjectRepository(Plan)
+    private readonly planRepository: Repository<Plan>,
   ) {}
 
   async findAll(): Promise<Groupe[]> {
@@ -18,18 +21,25 @@ export class GroupesService {
   }
 
   async createGroupe(groupeDTO: GroupeDTO): Promise<Groupe> {
+    try{
+    const planId = await this.planRepository.findOne({ where: { name: groupeDTO.planName } });
     const newGroupe = new Groupe();
     newGroupe.name = groupeDTO.name;
-    newGroupe.plan = groupeDTO.plan;
-  
-  
-    newGroupe.nbrab = groupeDTO.nbrab;
-   
+    newGroupe.planId = planId?.id;
     const savedGroupe = await this.groupeRepository.save(newGroupe);
+        
     return savedGroupe;
-    
-  }
+} catch (error) {
+    // Handle any errors that occur during the process
+    console.error('Error creating subscriber:', error);
+    throw error; // Optionally, you can throw the error to be handled by the caller
+}
+}
+  
+  
 
+   
+   
   async deactivateGroupe(id: number): Promise<Groupe> {
     const groupe= await this.groupeRepository.findOne({ where: { id } });
     if (!groupe) {
@@ -75,14 +85,9 @@ async updateGroupe(id: number, body: GroupeDTO): Promise<Groupe> {
   if (body.name !== undefined) {
     groupe.name = body.name;
   }
-  if (body.plan !== undefined) {
-    groupe.plan = body.plan;
-  }
  
  
-  if (body.nbrab !== undefined) {
-    groupe.nbrab = body.nbrab;
-  }
+ 
  
 
 

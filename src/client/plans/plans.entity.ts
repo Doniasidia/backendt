@@ -1,7 +1,10 @@
+
 //plans entity
 import { Status } from '@enums/status';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
+import { Groupe } from '@client/groupes/groupes.entity';
+import { group } from 'console';
 
 @Entity()
 export class Plan{
@@ -14,7 +17,7 @@ export class Plan{
   @Column()
   type: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 1 }) 
+  @Column({ type: 'decimal', precision: 10, scale: 3 }) 
   amount: number;
 
   @Column({ type: 'time', nullable: true })
@@ -36,5 +39,6 @@ endDate?: Date;
 @OneToMany(() => Subscriber, subscriber => subscriber.plan) // One plan has many subscribers
   subscribers: Subscriber[]; 
 
-
+  @OneToMany(() => Groupe, groupe => groupe.plan) // One plan has many subscribers
+  groupes: Groupe[];
 }
