@@ -19,7 +19,7 @@ export class AuthService {
     private subscriberRepository: SubscriberRepository,
   ) {}
 
-  async signIn(emailOrTelephone: string, password: string): Promise<{ access_token: string, role?: Role, redirectTo: string }> {
+  async signIn(emailOrTelephone: string, password: string): Promise<{ access_token: string, role?: Role }> {
     let user;
 
     
@@ -76,7 +76,6 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
       role: user.role,
-      redirectTo: redirectTo,
     };
   }
 }

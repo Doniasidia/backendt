@@ -27,9 +27,9 @@ export class AuthController {
     // Determine redirect URL based on user's role
     let redirectTo = '/'; // Default redirect URL
     if (role === Role.CLIENT) {
-      redirectTo = '/client';
+      redirectTo = '/client/dashboard';
     } else if (role === Role.ADMIN) {
-      redirectTo = '/admin';
+      redirectTo = '/admin/dashboard';
     }
     
     return { access_token, role, redirectTo };
