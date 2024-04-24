@@ -9,6 +9,6 @@ export class Admin extends User{
   id: number;
   @Column({ type: "enum", enum: Role, default: Role.ADMIN })
   role?: Role;
-
+  
  
 }

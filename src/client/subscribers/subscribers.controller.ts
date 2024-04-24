@@ -1,6 +1,6 @@
 // subscribers.controller.ts
 
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { SubscriberDTO } from '@client/subscribers/subscribers.dto';
@@ -46,10 +46,6 @@ async updateSubscriberStatus(@Param('id') id: number, @Body() body: { status: st
     return await this.subscriberService.updateSubscriberStatus(id, body.status);
   } catch (error) {
     throw new NotFoundException(error.message);
-  }
+  }
 }
-@Get('search/:telephone')
-    async searchSubscriberByTelephone(@Param('telephone') telephone: string): Promise<Subscriber | null> {
-        return await this.subscriberService.findSubscriberByTelephone(telephone);
-    }
 }

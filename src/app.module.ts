@@ -32,9 +32,13 @@ import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { SubscriberController } from '@client/subscribers/subscribers.controller';
 import { SubscriberModule } from '@client/subscribers/subscribers.module';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
-import { GroupesService } from '@client/groupes/groupes.service'; 
-import { Groupe } from '@client/groupes/groupes.entity';
-import { GroupesController } from '@client/groupes/groupes.controller';
+import { GroupsService } from '@client/groups/groups.service'; 
+import { Group } from '@client/groups/groups.entity';
+import { GroupsController } from '@client/groups/groups.controller';
+import { PaiementsService } from '@client/paiements/paiements.service'; 
+import { Paiement } from '@client/paiements/paiements.entity';
+import { PaiementsController } from '@client/paiements/paiements.controller';
+
 
 
 
@@ -43,7 +47,7 @@ import { GroupesController } from '@client/groupes/groupes.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Client,Plan , 
-      Subscriber , Groupe
+      Subscriber , Group , Paiement
     ]),
     ConfigModule.forRoot({ envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
@@ -62,7 +66,8 @@ import { GroupesController } from '@client/groupes/groupes.controller';
           Payment,
           Sessions,
           Plan,
-          Groupe,
+          Group,
+          Paiement,
           Subscription,
           Subscriber,
           Client,
@@ -77,10 +82,10 @@ import { GroupesController } from '@client/groupes/groupes.controller';
     SubscriberModule
   ],
   controllers: [AppController, ClientController,PlansController
-   ,SubscriberController ,GroupesController
+   ,SubscriberController ,GroupsController , PaiementsController
    ],
   providers: [AppService, ClientService, Repository,UserRepository,UserService,ClientRepository,AdminRepository, PlansService, Plan
-  ,SubscriberService,SubscriberRepository,GroupesService,Groupe
+  ,SubscriberService,SubscriberRepository,GroupsService,Group , Paiement, PaiementsService
   ],
 })
-export class AppModule {}
+export class AppModule {}

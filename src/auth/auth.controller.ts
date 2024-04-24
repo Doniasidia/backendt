@@ -6,19 +6,37 @@ import { Role } from '@enums/role';
 
 @Controller('auth')
 export class AuthController {
+
   constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-async signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string, role?: Role, redirectTo: string}> {
-  const emailOrTelephone = signInDto.email || signInDto.telephone;
-  if (!emailOrTelephone) {
-    throw new BadRequestException('Either email or telephone must be provided');
-  }
-  
+  async signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string, role?: Role, redirectTo: string}> {
+    const { email } = signInDto;
+    
+    if (!email) {
+      throw new BadRequestException('Either email or telephone must be provided');
+    }
 
-  return this.authService.signIn(emailOrTelephone, signInDto.password);
-}
+    
+    
+    const emailOrTelephone = email;
+  
+    const { access_token, role } = await this.authService.signIn(emailOrTelephone, signInDto.password);
+    
+    // Determine redirect URL based on user's role
+    let redirectTo = '/'; // Default redirect URL
+    if (role === Role.CLIENT) {
+      redirectTo = '/client';
+    } else if (role === Role.ADMIN) {
+      redirectTo = '/admin';
+    }
+    
+    return { access_token, role, redirectTo };
+  }
+
+
+
 
 
   @UseGuards(AuthGuard)

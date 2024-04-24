@@ -1,8 +1,8 @@
-//groupes.dto
+//paiements.dto
 import {  IsNotEmpty,  IsNumber,  IsString ,IsInt} from 'class-validator';
 
 
-export class GroupeDTO {
+export class PaiementDTO {
  
   @IsNotEmpty()
   @IsString()

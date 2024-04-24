@@ -1,9 +1,8 @@
-
 //plans entity
 import { Status } from '@enums/status';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
-import { Groupe } from '@client/groupes/groupes.entity';
+import { Group } from '@client/groups/groups.entity';
 import { group } from 'console';
 
 @Entity()
@@ -39,6 +38,6 @@ endDate?: Date;
 @OneToMany(() => Subscriber, subscriber => subscriber.plan) // One plan has many subscribers
   subscribers: Subscriber[]; 
 
-  @OneToMany(() => Groupe, groupe => groupe.plan) // One plan has many subscribers
-  groupes: Groupe[];
+  @OneToMany(() => Group, group => group.plan) // One plan has many groups
+  groups: Group[];
 }

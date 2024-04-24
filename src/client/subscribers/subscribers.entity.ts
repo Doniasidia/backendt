@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Groupe } from '@client/groupes/groupes.entity';
+import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
 import { Status } from '@enums/status';
 
@@ -20,8 +20,8 @@ export class Subscriber {
   @Column({ unique: true })
   telephone: string;
 
-  @ManyToOne(() => Groupe, groupe => groupe.subscribers) // Many subscribers belong to one group
-  groupe: Groupe;
+  @ManyToOne(() => Group, group => group.subscribers) // Many subscribers belong to one group
+  group: Group;
 
   @ManyToOne(() => Plan, plan => plan.subscribers) // Many subscribers belong to one plan
   plan: Plan;
@@ -29,9 +29,9 @@ export class Subscriber {
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED})
   status: Status;
 
-  @Column({ nullable: true }) // Add groupId column
-  groupeId: number;
+  @Column({ nullable: true, default: null }) // Add groupId column
+  groupId?: number  | null;
 
-  @Column({ nullable: true }) // Add planId column
-  planId: number;
+  @Column({ nullable: true, default: null }) // Add planId column
+  planId?: number  | null;
 }

@@ -1,6 +1,6 @@
 // subscribers.dto.ts
 
-import { IsNotEmpty, IsEmail, IsPhoneNumber,IsString ,  IsOptional, isNotEmpty} from 'class-validator';
+import { IsNotEmpty, IsEmail, IsPhoneNumber,IsString ,  IsOptional} from 'class-validator';
 
 export class SubscriberDTO {
   @IsNotEmpty()
@@ -19,15 +19,16 @@ export class SubscriberDTO {
   telephone: string;
 
  
+  @IsOptional()
   groupName: string;
 
-  
+  @IsOptional()
   planName: string;
 
-  
-  groupeId: number;
+  @IsOptional()
+  planId?: number;
 
- 
-  planId: number;
+  @IsOptional()
+  groupId?: number  ;
 
 }

@@ -1,13 +1,11 @@
 import { IsNotEmpty, IsEmail, IsPhoneNumber, IsOptional, IsString } from 'class-validator';
 export class SignInDto {
-  @IsOptional()
+  @IsNotEmpty()
   @IsEmail()
   email: string;
 
 
-  @IsOptional()
-  @IsPhoneNumber('TN')
-  telephone: string;
+  
 
   @IsNotEmpty()
   @IsString()

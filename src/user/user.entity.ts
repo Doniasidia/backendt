@@ -7,8 +7,10 @@ export class User {
   id: number;
   @Column()
   username: string;
-  @Column({ nullable: true, unique: true }) 
-  email: string | null;
+  @Column({nullable: true , unique: true })
+  email?: string | null;
+  @Column({ nullable: true })
+  password: string;
   @Column({ unique: true })
   telephone : string;
  

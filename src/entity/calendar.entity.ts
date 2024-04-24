@@ -6,11 +6,7 @@ export class Calendar {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  startDate: Date;
 
-  @Column()
-  endDate: Date;
 
   @ManyToOne(() => Subscription, (subscription) => subscription.id)
   subscription: Subscription;
