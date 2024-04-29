@@ -26,6 +26,8 @@ export class GroupsService {
     const newGroup = new Group();
     newGroup.name = groupDTO.name;
     newGroup.planId = plan?.id; 
+    if (groupDTO.selectedSlots) {
+      newGroup.selectedSlots = groupDTO.selectedSlots; }
     const savedGroup = await this.groupRepository.save(newGroup);
         
     return savedGroup;
@@ -94,4 +96,14 @@ async updateGroup(id: number, body: GroupDTO): Promise<Group> {
   const updatedGroup = await this.groupRepository.save(group);
   return updatedGroup;
 }
+async updateSelectedSlots(groupId: number, selectedSlots: string[]): Promise<Group> {
+  const group = await this.groupRepository.findOne({ where: { id: groupId } });
+  if (!group) {
+    throw new NotFoundException(`Group with ID ${groupId} not found`);
+  }
+
+  group.selectedSlots = selectedSlots;
+  return await this.groupRepository.save(group);
+}
+
 }

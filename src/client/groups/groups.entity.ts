@@ -24,7 +24,8 @@ export class Group{
   @OneToMany(() => Subscriber, subscriber => subscriber.group) // One group has many subscribers
   subscribers: Subscriber[];
 
-
+  @Column({ type: 'jsonb', nullable: true })
+  selectedSlots: string[]; 
 
 
 }

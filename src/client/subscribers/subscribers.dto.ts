@@ -5,10 +5,10 @@ import { IsNotEmpty, IsEmail, IsPhoneNumber,IsString ,  IsOptional} from 'class-
 export class SubscriberDTO {
   @IsNotEmpty()
   @IsString()
-  nom: string;
+  username: string;
   @IsNotEmpty()
   @IsString()
-  prenom: string;
+  firstname: string;
     
   @IsOptional()
   @IsEmail()

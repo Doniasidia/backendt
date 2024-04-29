@@ -42,8 +42,8 @@ export class SubscriberService {
 
         // Create a new subscriber object and set its properties
         const newSubscriber = new Subscriber();
-        newSubscriber.username = subscriberDTO.nom;
-        newSubscriber.FirstName = subscriberDTO.prenom;
+        newSubscriber.username = subscriberDTO.username;
+        newSubscriber.firstname = subscriberDTO.firstname;
         newSubscriber.email = subscriberDTO.email;
         newSubscriber.telephone = subscriberDTO.telephone;
 
@@ -82,19 +82,17 @@ export class SubscriberService {
       throw new NotFoundException(`Subscriber with ID ${id} not found`);
     }
   
-    if (body.nom !== undefined) {
-      subscriber.username = body.nom;
+    if (body.username !== undefined) {
+      subscriber.username = body.username;
     }
     
-    if (body.prenom !== undefined) {
-      subscriber.FirstName = body.prenom;
+    if (body.firstname !== undefined) {
+      subscriber.firstname = body.firstname;
     }
-    if (body.prenom !== undefined) {
-      subscriber.FirstName = body.prenom;
-    }
-    /*if (body.email !== undefined) {
+   
+    if (body.email !== undefined) {
       subscriber.email = body.email;
-    }*/
+    }
     if (body.telephone !== undefined) {
       subscriber.telephone = body.telephone;
     }

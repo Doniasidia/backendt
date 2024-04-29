@@ -12,7 +12,7 @@ export class Subscriber {
   username: string;
 
   @Column()
-  FirstName: string;
+  firstname: string;
 
   @Column({ nullable: true, unique: true })
   email: string | null;

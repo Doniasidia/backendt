@@ -49,5 +49,13 @@ export class GroupsController {
     }
   }
   
+@Patch(':id/selected-slots')
+async updateSelectedSlots(@Param('id') id: number, @Body() selectedSlots: string[]): Promise<Group> {
+  try {
+    return await this.groupsService.updateSelectedSlots(id, selectedSlots);
+  } catch (error) {
+    throw new NotFoundException(error.message);
+  }
+}
 
 }

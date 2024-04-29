@@ -14,5 +14,6 @@ export class GroupDTO {
 
   @IsOptional()
   planId?: number;
-  
+  @IsOptional()
+  selectedSlots?: string[]; 
 }
