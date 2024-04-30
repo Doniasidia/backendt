@@ -1,13 +1,7 @@
-// subscribers.controller.ts
-
-import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe } from '@nestjs/common';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { SubscriberDTO } from '@client/subscribers/subscribers.dto';
-
-
-
-
 
 @Controller('subscribers')
 export class SubscriberController {
@@ -17,35 +11,47 @@ export class SubscriberController {
   async getAllSubscribers(): Promise<Subscriber[]> {
     return await this.subscriberService.findAll();
   }
-  @Patch(':id')
-  async updateSubscriber(@Param('id') id: number, @Body() SubscriberDTO: SubscriberDTO): Promise<Subscriber> {
-    return await this.subscriberService.updateSubscriber(id, SubscriberDTO);
-  }
-  
+
   @Post()
-  async createSubscriber(@Body() body: SubscriberDTO): Promise<Subscriber> {
-    return await this.subscriberService.createSubscriber(body);
-  }
- 
-  @Patch(':id/deactivate') 
-async deactivateSubscriber(@Param('id') id: number): Promise<Subscriber> {
-  try {
-    return await this.subscriberService.deactivateSubscriber(id);
-  } catch (error) {
-    throw new NotFoundException(error.message);
-  }
-}
-@Get(':id')
-  async getClientById(@Param('id') id: string): Promise<Subscriber> {
-    return await this.subscriberService.getSubscriberById(+id); 
+  async createSubscriber(@Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
+    return await this.subscriberService.createSubscriber(subscriberDTO);
   }
 
-@Patch(':id/status')
-async updateSubscriberStatus(@Param('id') id: number, @Body() body: { status: string }): Promise<Subscriber> {
-  try {
-    return await this.subscriberService.updateSubscriberStatus(id, body.status);
-  } catch (error) {
-    throw new NotFoundException(error.message);
+  @Patch(':id')
+  async updateSubscriber(@Param('id', ParseIntPipe) id: number, @Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
+    return await this.subscriberService.updateSubscriber(id, subscriberDTO);
   }
-}
+
+  @Patch(':id/deactivate')
+  async deactivateSubscriber(@Param('id', ParseIntPipe) id: number): Promise<Subscriber> {
+    try {
+      return await this.subscriberService.deactivateSubscriber(id);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Get(':id')
+  async getSubscriberById(@Param('id', ParseIntPipe) id: number): Promise<Subscriber> {
+    return await this.subscriberService.getSubscriberById(id); 
+  }
+
+  @Patch(':id/status')
+  async updateSubscriberStatus(@Param('id', ParseIntPipe) id: number, @Body() body: { status: string }): Promise<Subscriber> {
+    try {
+      return await this.subscriberService.updateSubscriberStatus(id, body.status);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Get('no-invoices-next-month')
+  async findActiveSubscribersWithNoInvoicesForNextMonth(): Promise<Subscriber[]> {
+    return await this.subscriberService.findActiveSubscribersWithNoInvoicesForNextMonth();
+  }
+
+  @Post('generate-invoices-next-month')
+  async generateInvoicesForNextMonth(): Promise<void> {
+    await this.subscriberService.generateInvoicesForNextMonth();
+  }
 }

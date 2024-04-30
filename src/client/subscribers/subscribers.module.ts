@@ -9,11 +9,13 @@ import { GroupsModule } from '@client/groups/groups.module';
 import { PlansModule } from '@client/plans/plans.module';
 import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
+import { Invoice } from '@client/invoices/invoices.entity';
+import { InvoiceModule } from '@client/invoices/invoices.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Subscriber,Group,Plan]),
-    GroupsModule,PlansModule 
+    TypeOrmModule.forFeature([Subscriber,Group,Plan,Invoice]),
+    GroupsModule,PlansModule
   ],
   providers: [SubscriberService],
   controllers: [SubscriberController],

@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
 import { Status } from '@enums/status';
+import { Invoice } from '@client/invoices/invoices.entity';
 
 @Entity()
 export class Subscriber {
@@ -34,4 +35,6 @@ export class Subscriber {
 
   @Column({ nullable: true, default: null }) // Add planId column
   planId?: number  | null;
+  @OneToMany(() => Invoice, invoice => invoice.subscriber) // One subscriber can have multiple invoices
+  invoices: Invoice[];
 }

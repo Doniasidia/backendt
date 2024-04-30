@@ -6,7 +6,7 @@ import { AppService } from '@src/app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config'; 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Calendar } from '@entity/calendar.entity';
-import { Invoice } from '@entity/invoice.entity';
+import { Invoice } from '@client/invoices/invoices.entity';
 import { Message } from '@entity/message.entity';
 import { Payment } from '@entity/payment.entity';
 import { Plan} from '@client/plans/plans.entity';
@@ -38,6 +38,9 @@ import { GroupsController } from '@client/groups/groups.controller';
 import { PaiementsService } from '@client/paiements/paiements.service'; 
 import { Paiement } from '@client/paiements/paiements.entity';
 import { PaiementsController } from '@client/paiements/paiements.controller';
+import { InvoiceController } from '@client/invoices/invoices.controller';
+import { InvoiceService } from '@client/invoices/invoices.service';
+import { InvoiceModule } from '@client/invoices/invoices.module';
 
 
 
@@ -47,7 +50,7 @@ import { PaiementsController } from '@client/paiements/paiements.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Client,Plan , 
-      Subscriber , Group , Paiement
+      Subscriber , Group , Paiement, Invoice
     ]),
     ConfigModule.forRoot({ envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
@@ -82,10 +85,10 @@ import { PaiementsController } from '@client/paiements/paiements.controller';
     SubscriberModule
   ],
   controllers: [AppController, ClientController,PlansController
-   ,SubscriberController ,GroupsController , PaiementsController
+   ,SubscriberController ,GroupsController , PaiementsController, InvoiceController
    ],
   providers: [AppService, ClientService, Repository,UserRepository,UserService,ClientRepository,AdminRepository, PlansService, Plan
-  ,SubscriberService,SubscriberRepository,GroupsService,Group , Paiement, PaiementsService
+  ,SubscriberService,SubscriberRepository,GroupsService,Group , Paiement, PaiementsService, InvoiceService
   ],
 })
 export class AppModule {}
