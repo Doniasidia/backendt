@@ -32,7 +32,7 @@ export class AuthController {
       redirectTo = '/admin/dashboard';
     }
     
-    return { access_token, role, redirectTo };
+    return { access_token, role , redirectTo };
   }
 
 

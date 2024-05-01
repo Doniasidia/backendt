@@ -45,13 +45,6 @@ export class SubscriberController {
     }
   }
 
-  @Get('no-invoices-next-month')
-  async findActiveSubscribersWithNoInvoicesForNextMonth(): Promise<Subscriber[]> {
-    return await this.subscriberService.findActiveSubscribersWithNoInvoicesForNextMonth();
-  }
-
-  @Post('generate-invoices-next-month')
-  async generateInvoicesForNextMonth(): Promise<void> {
-    await this.subscriberService.generateInvoicesForNextMonth();
-  }
+ 
+  
 }

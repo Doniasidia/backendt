@@ -10,6 +10,8 @@ import * as bcrypt from 'bcrypt';
 import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
 import { Invoice } from '@client/invoices/invoices.entity';
+
+
 @Injectable()
 export class SubscriberService {
   constructor(
@@ -19,8 +21,10 @@ export class SubscriberService {
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
-    @InjectRepository(Invoice)
-    private readonly invoiceRepository: Repository<Invoice>,
+   
+  
+   
+
   ) {}
 
   async findAll(): Promise<Subscriber[]> {
@@ -132,56 +136,5 @@ async updateSubscriberStatus(id: number, status: string): Promise<Subscriber> {
 }
 async findSubscriberByTelephone(telephone: string): Promise<Subscriber | null> {
   return await this.subscriberRepository.findOne({ where: { telephone } });
-}
-
-async findActiveSubscribersWithNoInvoicesForNextMonth(): Promise<Subscriber[]> {
-  const currentDate = new Date();
-  const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-  const nextMonthYear = nextMonth.getFullYear();
-  const nextMonthMonth = nextMonth.getMonth();
-
-  // Query active subscribers who have no invoices for the next month
-  const subscribers = await this.subscriberRepository.createQueryBuilder('subscriber')
-    .leftJoinAndSelect('subscriber.invoices', 'invoice')
-    .where('subscriber.status = :status', { status: Status.ACTIVATED })
-    .andWhere('YEAR(invoice.dueDate) = :year', { year: nextMonthYear })
-    .andWhere('MONTH(invoice.dueDate) = :month', { month: nextMonthMonth })
-    .andWhere('invoice.id IS NULL')
-    .getMany();
-
-  return subscribers;
-}
-async generateInvoicesForNextMonth(): Promise<void> {
-  // Get active subscribers
-  const activeSubscribers = await this.subscriberRepository.find({
-    where: { status: Status.ACTIVATED },
-    relations: ['plan', 'group'], // Load the associated plan and group for each subscriber
-  });
-
-  // Generate invoices for each active subscriber
-  for (const subscriber of activeSubscribers) {
-    const nextMonthInvoice = new Invoice();
-    nextMonthInvoice.subscriber = subscriber;
-
-    if (subscriber.plan) {
-      // If the subscriber has a direct plan, use the plan amount
-      nextMonthInvoice.amount = subscriber.plan.amount;
-    } else if (subscriber.group && subscriber.group.plan) {
-      // If the subscriber belongs to a group and the group has a plan, use the group's plan amount
-      nextMonthInvoice.amount = subscriber.group.plan.amount;
-    } else {
-      // Handle the case where neither the subscriber nor the group has a plan
-      // You can throw an error or set a default amount here
-      throw new Error('No plan found for subscriber or group');
-    }
-
-    nextMonthInvoice.createdAt = new Date(); // Set the date of the invoice to the current date
-    // Set the due date of the invoice to the first day of next month
-    const currentDate = new Date();
-    nextMonthInvoice.dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-
-    // Save the invoice
-    await this.invoiceRepository.save(nextMonthInvoice);
-  }
 }
 }

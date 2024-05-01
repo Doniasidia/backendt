@@ -7,6 +7,8 @@ import {  Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Status } from '@enums/status';
+import { ClientRepository } from "@user/client.repository";
+
 
 @Injectable()
 export class ClientService {
@@ -14,7 +16,10 @@ export class ClientService {
     @InjectRepository(Client)
     private readonly clientRepository: Repository<Client>,
   ) {}
-
+  async getClientData(clientId: string) {
+    const id = parseInt(clientId); // Assuming clientId is a string
+    return await this.clientRepository.findOne({ where: { id } });
+  }
   async findAll(): Promise<Client[]> {
     return await this.clientRepository.find();
   }

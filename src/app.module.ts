@@ -41,6 +41,8 @@ import { PaiementsController } from '@client/paiements/paiements.controller';
 import { InvoiceController } from '@client/invoices/invoices.controller';
 import { InvoiceService } from '@client/invoices/invoices.service';
 import { InvoiceModule } from '@client/invoices/invoices.module';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 
 
@@ -48,7 +50,7 @@ import { InvoiceModule } from '@client/invoices/invoices.module';
 
 
 @Module({
-  imports: [
+  imports: [ ScheduleModule.forRoot(),
     TypeOrmModule.forFeature([Client,Plan , 
       Subscriber , Group , Paiement, Invoice
     ]),

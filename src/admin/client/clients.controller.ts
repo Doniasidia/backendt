@@ -1,16 +1,23 @@
 // client.controller.ts
 
-import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch, Request } from '@nestjs/common';
 import { Client } from '@admin/client/client.entity';
 import { ClientService } from '@admin/client/clients.service';
 import { ClientDTO } from '@admin/client/client.dto';
+import { JwtAuthGuard } from '@auth/JwtAuthGuard';
 
 
 
 @Controller('clients')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
-  
+  @UseGuards(JwtAuthGuard)
+  @Get('data')
+  getClientData(@Request() req) {
+    // Assuming the client's ID is stored in the JWT payload
+    const clientId = req.user.id;
+    return this.clientService.getClientData(clientId);
+  }
   @Get()
   async getAllClients(): Promise<Client[]> {
     try {

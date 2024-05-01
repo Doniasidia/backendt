@@ -16,9 +16,9 @@ export class ClientRepository {
     this.clientRepository = this.dataSource.getRepository(Client);
   }
 
+  
+
   async findOneByEmailOrTelephone(emailOrTelephone: string): Promise<Client | undefined> {
     return this.clientRepository.findOne({ where: [{ email: emailOrTelephone }, { telephone: emailOrTelephone }] });
   }
-
-  
 }

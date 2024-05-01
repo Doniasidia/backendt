@@ -8,7 +8,8 @@ export class Invoice {
 
   @Column()
   subscriberId: number;
-
+  @Column()
+  subscriberName : string;
   @Column()
   amount: number;
 
