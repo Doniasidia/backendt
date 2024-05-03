@@ -17,7 +17,7 @@ export class AuthService {
     private subscriberRepository: SubscriberRepository,
   ) {}
 
-  async signIn(emailOrTelephone: string, password: string): Promise<{ access_token: string, role: Role, redirectTo: string }> {
+  async signIn(emailOrTelephone: string, password: string): Promise<{ access_token: string, role: Role, accountId: string, redirectTo: string }> {
     let user;
 
     // Assuming clients are identified by email
@@ -32,13 +32,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Construct payload and return access token along with redirect URL
+    // Construct redirect URL with accountId
+    let redirectTo = `/client/dashboard/${user.accountId}`;
+
+    // Construct payload and return access token along with unique account identifier and redirectTo URL
     const payload = { sub: user.id, username: user.username, role: user.role };
-    let redirectTo = '/client/dashboard'; // Default redirect URL for clients
     return {
       access_token: await this.jwtService.signAsync(payload),
       role: user.role,
-      redirectTo: redirectTo,
+      accountId: user.accountId,
+      redirectTo: redirectTo, // Include redirectTo in the response data
     };
   }
 }

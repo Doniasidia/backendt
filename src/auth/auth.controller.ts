@@ -11,18 +11,15 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string, role?: Role, redirectTo: string}> {
+  async signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string, role?: Role, redirectTo: string }> {
     const { email } = signInDto;
     
     if (!email) {
       throw new BadRequestException('Either email or telephone must be provided');
     }
 
-    
-    
-    const emailOrTelephone = email;
-  
-    const { access_token, role } = await this.authService.signIn(emailOrTelephone, signInDto.password);
+    // Delegate sign-in operation to AuthService
+    const { access_token, role } = await this.authService.signIn(email, signInDto.password);
     
     // Determine redirect URL based on user's role
     let redirectTo = '/'; // Default redirect URL
@@ -32,16 +29,8 @@ export class AuthController {
       redirectTo = '/admin/dashboard';
     }
     
-    return { access_token, role , redirectTo };
+    return { access_token, role, redirectTo };
   }
 
-
-
-
-
-  @UseGuards(AuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
+  // Other methods...
 }

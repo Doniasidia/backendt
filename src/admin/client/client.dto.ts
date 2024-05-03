@@ -1,6 +1,6 @@
 // client.dto.ts
 
-import { IsNotEmpty, IsEmail, IsPhoneNumber,IsString } from 'class-validator';
+import { IsNotEmpty, IsEmail, IsPhoneNumber,IsString, IsOptional } from 'class-validator';
 
 export class ClientDTO {
   @IsNotEmpty()
@@ -23,4 +23,6 @@ export class ClientDTO {
   @IsNotEmpty()
   @IsString()
   typepack: string;
+  @IsOptional()
+  accountId: string;
 }
