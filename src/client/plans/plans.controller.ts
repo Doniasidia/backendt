@@ -1,22 +1,29 @@
 //plans.controller
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, Patch, UseGuards, Request } from '@nestjs/common';
 import { PlansService } from '@client/plans/plans.service';
 import { PlanDTO} from '@client/plans/plans.dto'; 
 import { Plan } from '@client/plans/plans.entity';
+import { AuthGuard } from '@auth/auth.guard';
 
 @Controller('plans')
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async getAllPlans(): Promise<Plan[]> {
-    return await this.plansService.findAll(); // Using the 'findAll' method from the service
+  async getAllPlans(@Request() req): Promise<Plan[]> {
+    // Get the user ID from the request object (assuming it's stored in the user property)
+    const clientId = req.user.sub;
+    return await this.plansService.findPlansByClientId(clientId);
   }
 
   
+  @UseGuards(AuthGuard)
   @Post()
-  async createPlan(@Body() PlanDTO: PlanDTO): Promise<Plan> {
-    return await this.plansService.createPlan(PlanDTO);
+  async createPlan(@Body() planDTO: PlanDTO, @Request() req): Promise<Plan> {
+    // Get the user ID from the request object (assuming it's stored in the user property)
+    const clientId = req.user.sub;
+    return await this.plansService.createPlan(planDTO, clientId);
   }
 
   @Patch(':id')

@@ -3,6 +3,7 @@ import { Status } from '@enums/status';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { Plan } from '@client/plans/plans.entity';
+import { Client } from '@admin/client/client.entity';
 
 @Entity()
 export class Group{
@@ -26,6 +27,8 @@ export class Group{
 
   @Column({ type: 'jsonb', nullable: true })
   selectedSlots: string[]; 
+  @ManyToOne(() => Client, client => client.groups)
+  createdBy: Client;
 
 
 }

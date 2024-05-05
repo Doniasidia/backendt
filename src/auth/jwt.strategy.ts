@@ -30,13 +30,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     switch (payload.role) {
       case 'client':
-        user = await this.clientRepository.findOneByEmailOrTelephone(payload.sub);
+        user = await this.clientRepository.findOneByEmail(payload.sub);
         break;
       case 'admin':
-        user = await this.adminRepository.findOneByEmailOrTelephone(payload.sub);
+        user = await this.adminRepository.findOneByEmail(payload.sub);
         break;
       case 'subscriber':
-        user = await this.subscriberRepository.findOneByEmailOrTelephone(payload.sub);
+        user = await this.subscriberRepository.findOneByEmail(payload.sub);
         break;
     
     }

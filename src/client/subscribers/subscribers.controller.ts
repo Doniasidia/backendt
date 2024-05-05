@@ -1,20 +1,28 @@
-import { Controller, Get, Post, Delete, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe } from '@nestjs/common';
+//subscriber.controller
+import { Controller, Get, Post, Request, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe } from '@nestjs/common';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { SubscriberDTO } from '@client/subscribers/subscribers.dto';
+import { AuthGuard } from '@auth/auth.guard';
 
 @Controller('subscribers')
 export class SubscriberController {
-  constructor(private readonly subscriberService: SubscriberService) {}
-  
+  constructor(private readonly subscriberService: SubscriberService) { }
+
+  @UseGuards(AuthGuard)
   @Get()
-  async getAllSubscribers(): Promise<Subscriber[]> {
-    return await this.subscriberService.findAll();
+  async getAllSubscribers(@Request() req): Promise<Subscriber[]> {
+    // Get the user ID from the request object (assuming it's stored in the user property)
+    const clientId = req.user.sub;
+    return await this.subscriberService.findSubscribersByClientId(clientId);
   }
 
+  @UseGuards(AuthGuard)
   @Post()
-  async createSubscriber(@Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
-    return await this.subscriberService.createSubscriber(subscriberDTO);
+  async createSubscriber(@Body() subscriberDTO: SubscriberDTO, @Request() req): Promise<Subscriber> {
+    // Get the user ID from the request object (assuming it's stored in the user property)
+    const clientId = req.user.sub;
+    return await this.subscriberService.createSubscriber(subscriberDTO, clientId);
   }
 
   @Patch(':id')
@@ -33,7 +41,7 @@ export class SubscriberController {
 
   @Get(':id')
   async getSubscriberById(@Param('id', ParseIntPipe) id: number): Promise<Subscriber> {
-    return await this.subscriberService.getSubscriberById(id); 
+    return await this.subscriberService.getSubscriberById(id);
   }
 
   @Patch(':id/status')
@@ -44,7 +52,4 @@ export class SubscriberController {
       throw new NotFoundException(error.message);
     }
   }
-
- 
-  
 }

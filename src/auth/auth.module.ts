@@ -16,13 +16,12 @@ import { SubscriberRepository } from '@user/subscriber.repository';
   imports: [
     UserModule,
     JwtModule.register({
-      
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '120s' },
+      signOptions: { expiresIn: '100000s' },
     }),
   ],
-  providers: [AuthService, JwtStrategy, UserService,Repository,UserRepository,ClientRepository,AdminRepository,SubscriberRepository],
+  providers: [AuthService, JwtStrategy, UserService, Repository, UserRepository, ClientRepository, AdminRepository, SubscriberRepository],
   controllers: [AuthController],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

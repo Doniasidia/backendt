@@ -1,9 +1,10 @@
 //plans entity
 import { Status } from '@enums/status';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { Group } from '@client/groups/groups.entity';
 import { group } from 'console';
+import { Client } from '@admin/client/client.entity';
 
 @Entity()
 export class Plan{
@@ -40,4 +41,6 @@ endDate?: Date;
 
   @OneToMany(() => Group, group => group.plan) // One plan has many groups
   groups: Group[];
+  @ManyToOne(() => Client, client => client.plans)
+  createdBy: Client;
 }

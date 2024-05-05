@@ -1,22 +1,29 @@
 //groupes.controller
-import { Controller, Get, Post, Delete, Param, Body, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, NotFoundException, Patch, Request, UseGuards } from '@nestjs/common';
 import { GroupsService } from '@client/groups/groups.service';
 import { GroupDTO } from '@client/groups/groups.dto';
 import { Group } from '@client/groups/groups.entity';
+import { AuthGuard } from '@auth/auth.guard';
 
 @Controller('groups')
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async getAllGroups(): Promise<Group[]> {
-    return await this.groupsService.findAll(); // Using the 'findAll' method from the service
+  async getAllGroups(@Request() req): Promise<Group[]> {
+    // Get the user ID from the request object (assuming it's stored in the user property)
+    const clientId = req.user.sub;
+    return await this.groupsService.findGroupsByClientId(clientId);
   }
 
   
+  @UseGuards(AuthGuard)
   @Post()
-  async createGroup(@Body() GroupDTO: GroupDTO): Promise<Group> {
-    return await this.groupsService.createGroup(GroupDTO);
+  async createGroup(@Body() groupDTO: GroupDTO, @Request() req): Promise<Group> {
+    // Get the user ID from the request object (assuming it's stored in the user property)
+    const clientId = req.user.sub;
+    return await this.groupsService.createGroup(groupDTO, clientId);
   }
 
   @Patch(':id')

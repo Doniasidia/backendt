@@ -1,15 +1,15 @@
-// app.module.ts
-
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt'; // Import JwtModule
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from '@src/app.controller';
 import { AppService } from '@src/app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config'; 
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Calendar } from '@entity/calendar.entity';
 import { Invoice } from '@client/invoices/invoices.entity';
 import { Message } from '@entity/message.entity';
 import { Payment } from '@entity/payment.entity';
-import { Plan} from '@client/plans/plans.entity';
+import { Plan } from '@client/plans/plans.entity';
 import { Subscription } from '@client/subscription/subscription.entity';
 import { Sessions } from '@entity/sessions.entity';
 import { Client } from '@admin/client/client.entity';
@@ -32,29 +32,22 @@ import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { SubscriberController } from '@client/subscribers/subscribers.controller';
 import { SubscriberModule } from '@client/subscribers/subscribers.module';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
-import { GroupsService } from '@client/groups/groups.service'; 
+import { GroupsService } from '@client/groups/groups.service';
 import { Group } from '@client/groups/groups.entity';
 import { GroupsController } from '@client/groups/groups.controller';
-import { PaiementsService } from '@client/paiements/paiements.service'; 
+import { PaiementsService } from '@client/paiements/paiements.service';
 import { Paiement } from '@client/paiements/paiements.entity';
 import { PaiementsController } from '@client/paiements/paiements.controller';
 import { InvoiceController } from '@client/invoices/invoices.controller';
 import { InvoiceService } from '@client/invoices/invoices.service';
 import { InvoiceModule } from '@client/invoices/invoices.module';
-import { ScheduleModule } from '@nestjs/schedule';
-
-
-
-
-
-
+import { jwtConstants } from '@auth/constants';
 
 @Module({
-  imports: [ ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Client,Plan , 
-      Subscriber , Group , Paiement, Invoice
-    ]),
-    ConfigModule.forRoot({ envFilePath: '.env' }),
+  imports: [
+    ScheduleModule.forRoot(),
+    TypeOrmModule.forFeature([Client, Plan, Subscriber, Group, Paiement, Invoice]),
+    ConfigModule.forRoot({ envFilePath: '.env', }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -83,14 +76,41 @@ import { ScheduleModule } from '@nestjs/schedule';
       }),
       inject: [ConfigService],
     }),
-    ClientModule,AuthModule,UserModule,
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '10000s' },
+    }),
+    ClientModule,
+    AuthModule,
+    UserModule,
     SubscriberModule
   ],
-  controllers: [AppController, ClientController,PlansController
-   ,SubscriberController ,GroupsController , PaiementsController, InvoiceController
-   ],
-  providers: [AppService, ClientService, Repository,UserRepository,UserService,ClientRepository,AdminRepository, PlansService, Plan
-  ,SubscriberService,SubscriberRepository,GroupsService,Group , Paiement, PaiementsService, InvoiceService
+  controllers: [
+    AppController,
+    ClientController,
+    PlansController,
+    SubscriberController,
+    GroupsController,
+    PaiementsController,
+    InvoiceController
+  ],
+  providers: [
+    AppService,
+    ClientService,
+    Repository,
+    UserRepository,
+    UserService,
+    ClientRepository,
+    AdminRepository,
+    PlansService,
+    Plan,
+    SubscriberService,
+    SubscriberRepository,
+    GroupsService,
+    Group,
+    Paiement,
+    PaiementsService,
+    InvoiceService
   ],
 })
-export class AppModule {}
+export class AppModule { }

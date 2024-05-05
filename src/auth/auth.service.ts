@@ -15,33 +15,60 @@ export class AuthService {
     private clientRepository: ClientRepository,
     private adminRepository: AdminRepository,
     private subscriberRepository: SubscriberRepository,
-  ) {}
+  ) { }
 
-  async signIn(emailOrTelephone: string, password: string): Promise<{ access_token: string, role: Role, accountId: string, redirectTo: string }> {
+  async signIn(email: string, password: string): Promise<{ access_token: string, role: Role, redirectTo: string, username: string }> {
     let user;
+    let role = Role.ADMIN; // Default role
+    let redirectTo = '/admin/dashboard'; // Default redirect URL
 
-    // Assuming clients are identified by email
-    user = await this.clientRepository.findOneByEmailOrTelephone(emailOrTelephone);
+    // Check if user exists in admin repository
+    user = await this.adminRepository.findOneByEmail(email);
+    if (user) {
+        role = Role.ADMIN;
+        redirectTo = '/admin/dashboard';
+    } else {
+        // If user doesn't exist in admin repository, check subscriber repository
+        user = await this.subscriberRepository.findOneByEmail(email);
+        if (user) {
+            role = Role.SUBSCRIBER;
+            redirectTo = '/subs/abonnements'; // Redirect URL for subscribers
+        } else {
+            // If user doesn't exist in subscriber repository, check client repository
+            user = await this.clientRepository.findOneByEmail(email);
+            if (user) {
+                role = Role.CLIENT;
+                redirectTo = '/client/dashboard'; // Redirect URL for clients
+            }
+        }
+    }
+
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+        // If user doesn't exist in any repository, throw UnauthorizedException
+        throw new UnauthorizedException('Invalid credentials');
     }
 
     // Compare hashed password with the received password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    let isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    // If the hashed password doesn't match, check if the password is plain text
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+        // Check if the received password matches the plain-text password stored in the database
+        isPasswordValid = password === user.password;
     }
 
-    // Construct redirect URL with accountId
-    let redirectTo = `/client/dashboard/${user.accountId}`;
+    if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+    }
 
-    // Construct payload and return access token along with unique account identifier and redirectTo URL
-    const payload = { sub: user.id, username: user.username, role: user.role };
+    // Construct payload and return access token along with redirect URL
+    const payload = { sub: user.id, username: user.username, role };
+    
     return {
-      access_token: await this.jwtService.signAsync(payload),
-      role: user.role,
-      accountId: user.accountId,
-      redirectTo: redirectTo, // Include redirectTo in the response data
+        access_token: await this.jwtService.signAsync(payload),
+        role,
+        redirectTo,
+        username: user.username,
     };
-  }
+}
 }

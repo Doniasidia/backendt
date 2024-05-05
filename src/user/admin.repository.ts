@@ -15,8 +15,8 @@ export class AdminRepository {
     this.adminRepository = this.dataSource.getRepository(Admin);
   }
 
-  async findOneByEmailOrTelephone(emailOrTelephone: string): Promise<Admin | undefined> {
-    return this.adminRepository.findOne({ where: [{ email: emailOrTelephone }, { telephone: emailOrTelephone }] });
+  async findOneByEmail(email: string): Promise<Admin | undefined> {
+    return this.adminRepository.findOne({ where: { email } });
   }
 
   

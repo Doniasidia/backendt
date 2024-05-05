@@ -6,6 +6,7 @@ import { GroupDTO} from '@client/groups/groups.dto';
 import { Group } from '@client/groups/groups.entity';
 import { Status } from '@enums/status';
 import { Plan } from '@client/plans/plans.entity';
+import { Client } from '@admin/client/client.entity';
 
 @Injectable()
 export class GroupsService {
@@ -14,22 +15,35 @@ export class GroupsService {
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
+    @InjectRepository(Client) // Inject the Client repository
+    private clientRepository: Repository<Client>,
   ) {}
 
-  async findAll(): Promise<Group[]> {
-    return await this.groupRepository.find();
+  async findGroupsByClientId(clientId: number): Promise<Group[]> {
+    return await this.groupRepository.find({
+      where: {
+        createdBy: { id: clientId }
+      }
+    });
   }
 
-  async createGroup(groupDTO: GroupDTO): Promise<Group> {
+
+  async createGroup(groupDTO: GroupDTO, clientId: number): Promise<Group> {
     try{
     const plan = await this.planRepository.findOne({ where: { id: groupDTO.planId } });
+    const client = await this.clientRepository.findOne({ where: { id: clientId } });
+
     const newGroup = new Group();
     newGroup.name = groupDTO.name;
     newGroup.planId = plan?.id; 
     if (groupDTO.selectedSlots) {
       newGroup.selectedSlots = groupDTO.selectedSlots; }
-    const savedGroup = await this.groupRepository.save(newGroup);
-        
+      newGroup.createdBy = client;
+
+      const insertResult = await this.groupRepository.insert(newGroup);
+      const savedGroup = await this.groupRepository.findOne({
+        where: { id: insertResult.identifiers[0].id }
+      });        
     return savedGroup;
 } catch (error) {
     // Handle any errors that occur during the process

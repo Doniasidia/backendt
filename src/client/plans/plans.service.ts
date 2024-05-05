@@ -5,19 +5,28 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Plan } from '@client/plans/plans.entity';
 import { PlanDTO } from '@client/plans/plans.dto';
 import { Status } from '@enums/status';
+import { Client } from '@admin/client/client.entity';
 
 @Injectable()
 export class PlansService {
   constructor(
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
+    @InjectRepository(Client) // Inject the Client repository
+    private clientRepository: Repository<Client>,
   ) {}
 
-  async findAll(): Promise<Plan[]> {
-    return await this.planRepository.find();
+  async findPlansByClientId(clientId: number): Promise<Plan[]> {
+    return await this.planRepository.find({
+      where: {
+        createdBy: { id: clientId }
+      }
+    });
   }
 
-  async createPlan(planDTO: PlanDTO): Promise<Plan> {
+  async createPlan(planDTO: PlanDTO, clientId: number): Promise<Plan> {
+    const client = await this.clientRepository.findOne({ where: { id: clientId } });
+
     const newPlan = new Plan();
     newPlan.name = planDTO.name;
     newPlan.type = planDTO.type;
@@ -27,7 +36,12 @@ export class PlansService {
     newPlan.enligne = planDTO.enligne;
     newPlan.startDate = planDTO.startDate;
     newPlan.endDate = planDTO.endDate;
-    const savedPlan = await this.planRepository.save(newPlan);
+    newPlan.createdBy = client;
+
+    const insertResult = await this.planRepository.insert(newPlan);
+    const savedPlan= await this.planRepository.findOne({
+      where: { id: insertResult.identifiers[0].id }
+    });    
     return savedPlan;
     
   }
