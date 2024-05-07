@@ -15,7 +15,7 @@ export class UserService {
     this.userRepository = this.dataSource.getRepository(User);
   }
 
-  async findOneByEmailOrTelephone(emailOrTelephone: string): Promise<User | undefined> {
+  async findOneByEmail(emailOrTelephone: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: [{ email: emailOrTelephone }, { telephone: emailOrTelephone }] });
   }
 

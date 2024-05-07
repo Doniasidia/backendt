@@ -14,8 +14,8 @@ export class UserRepository {
     this.userRepository = this.dataSource.getRepository(User);
   }
 
-  async findOneByEmail(emailOrTelephone: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { email: emailOrTelephone } });
+  async findOneByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { email}});
   }
 
  

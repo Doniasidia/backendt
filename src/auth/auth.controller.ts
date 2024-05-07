@@ -11,7 +11,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string, role?: Role, redirectTo: string, username: string }> {
+  async signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string, role?: Role, redirectTo: string, username: string ,userId: number}> {
     const { email } = signInDto;
 
     if (!email) {
@@ -20,9 +20,9 @@ export class AuthController {
 
     const emailOrTelephone = email;
 
-    const { access_token, role, redirectTo, username } = await this.authService.signIn(emailOrTelephone, signInDto.password);
+    const { access_token, role, redirectTo, username ,userId} = await this.authService.signIn(emailOrTelephone, signInDto.password);
 
-    return { access_token, role, redirectTo, username };
+    return { access_token, role, redirectTo, username ,userId};
   }
 
   @UseGuards(AuthGuard)

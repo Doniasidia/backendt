@@ -1,5 +1,5 @@
 //subscriber.controller
-import { Controller, Get, Post, Request, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Request, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe, UnauthorizedException } from '@nestjs/common';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { SubscriberDTO } from '@client/subscribers/subscribers.dto';
@@ -9,16 +9,24 @@ import { AuthGuard } from '@auth/auth.guard';
 export class SubscriberController {
   constructor(private readonly subscriberService: SubscriberService) { }
 
-  @UseGuards(AuthGuard)
-  @Get()
+ 
+   @Get()
+  @UseGuards(AuthGuard) // Apply the authentication guard to protect this endpoint
   async getAllSubscribers(@Request() req): Promise<Subscriber[]> {
+    // Check if req.user and req.user.sub are defined
+    if (!req.user || !req.user.sub) {
+      throw new UnauthorizedException('User ID not found in request');
+    }
+
     // Get the user ID from the request object (assuming it's stored in the user property)
     const clientId = req.user.sub;
     return await this.subscriberService.findSubscribersByClientId(clientId);
-  }
+  
+  // Other controller methods...
+}
 
-  @UseGuards(AuthGuard)
   @Post()
+  @UseGuards(AuthGuard) 
   async createSubscriber(@Body() subscriberDTO: SubscriberDTO, @Request() req): Promise<Subscriber> {
     // Get the user ID from the request object (assuming it's stored in the user property)
     const clientId = req.user.sub;

@@ -17,10 +17,10 @@ export class AuthService {
     private subscriberRepository: SubscriberRepository,
   ) { }
 
-  async signIn(email: string, password: string): Promise<{ access_token: string, role: Role, redirectTo: string, username: string }> {
+  async signIn(email: string, password: string): Promise<{ access_token: string, role: Role, redirectTo: string, username: string, userId: number }> {
     let user;
-    let role = Role.ADMIN; // Default role
-    let redirectTo = '/admin/dashboard'; // Default redirect URL
+    let role ; // Default role
+    let redirectTo = '/login'; // Default redirect URL
 
     // Check if user exists in admin repository
     user = await this.adminRepository.findOneByEmail(email);
@@ -62,13 +62,14 @@ export class AuthService {
     }
 
     // Construct payload and return access token along with redirect URL
-    const payload = { sub: user.id, username: user.username, role };
+    const payload = { sub: user.id, username: user.username, role, userId: user.id }; // Include userId in the payload
     
     return {
         access_token: await this.jwtService.signAsync(payload),
         role,
         redirectTo,
         username: user.username,
+        userId: user.id // Include userId in the response
     };
-}
+  }
 }

@@ -1,5 +1,5 @@
 //subscriber.entity
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
 import { Status } from '@enums/status';
@@ -35,4 +35,8 @@ export class Subscriber extends User{
 
   @ManyToOne(() => Client, client => client.subscribers)
   createdBy: Client;
+  @ManyToMany(() => Client, client => client.subscribers) // Many subscribers can belong to many clients
+  @JoinTable()
+  clients: Client[];
+  
 }
