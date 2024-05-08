@@ -13,10 +13,11 @@ import { Plan } from '@client/plans/plans.entity';
 import { Invoice } from '@client/invoices/invoices.entity';
 import { jwtConstants } from '@auth/constants';
 import { Client } from '@admin/client/client.entity';
+import { Subscription } from '@client/subscriptions/subscription.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Subscriber, Group, Plan, Invoice, Client]),
+    TypeOrmModule.forFeature([Subscriber, Group, Plan, Invoice, Client,Subscription]),
     GroupsModule,
     PlansModule,
     JwtModule.register({

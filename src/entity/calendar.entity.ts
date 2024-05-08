@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Subscription } from '@client/subscription/subscription.entity';
+import { Subscription } from '@client/subscriptions/subscription.entity';
 
 @Entity()
 export class Calendar {

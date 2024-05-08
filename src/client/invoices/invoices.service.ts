@@ -10,6 +10,7 @@ import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
 import { Status } from '@enums/status';
 import { round } from 'lodash';
+import { Client } from '@admin/client/client.entity';
 
 
 
@@ -24,28 +25,34 @@ export class InvoiceService {
     private readonly planRepository: Repository<Plan>,
     @InjectRepository(Group) 
     private readonly groupRepository: Repository<Group>,
+    @InjectRepository(Client) 
+    private readonly clientRepository: Repository<Client>, // Inject the Client repository
   ) {}
-  @Cron('0 22 28-31 * *', { timeZone: 'Europe/Paris' })
-  async generateInvoicesCron(): Promise<void> {
-      await this.generateInvoicesForNextMonth();
-  }
 
-  
+  @Cron('* * * * * *', { timeZone: 'Europe/Paris' })
+  async generateInvoicesCron(): Promise<void> {
+    // Get all clients
+    const clients = await this.clientRepository.find();
+
+    // Loop through each client
+    for (const client of clients) {
+      await this.generateInvoicesForNextMonth(client.id);
+    }
+  }
 
   async findAll(): Promise<Invoice[]> {
     return await this.invoiceRepository.find();
   }
 
- 
+  async getAllActiveSubscriptions(clientId: number): Promise<Subscriber[]> {
+    // Get all active subscribers belonging to the client
+    return await this.subscriberRepository.find({ where: { client: { id: clientId }, status: Status.ACTIVATED } });
+}
 
 
- 
-  async getAllActiveSubscriptions(): Promise<Subscriber[]> {
-    return await this.subscriberRepository.find({ where: { status: Status.ACTIVATED } });
-  }
-  async generateInvoicesForNextMonth(): Promise<void> {
-    // Get all active subscribers
-    const activeSubscribers = await this.getAllActiveSubscriptions();
+  async generateInvoicesForNextMonth(clientId: number): Promise<void> {
+    // Get all active subscribers belonging to the client
+    const activeSubscribers = await this.getAllActiveSubscriptions(clientId);
   
     // Loop through each active subscriber
     for (const subscriber of activeSubscribers) {
@@ -60,6 +67,8 @@ export class InvoiceService {
       // If there's no existing invoice, create a new one
       if (!existingInvoice) {
         const nextMonthInvoice = new Invoice();
+        const client = await this.clientRepository.findOne({ where: { id: clientId } });
+
         nextMonthInvoice.subscriber = subscriber;
         nextMonthInvoice.subscriberName = subscriber.firstname; // Assuming the name property exists in the Subscriber entity
 
@@ -93,10 +102,16 @@ export class InvoiceService {
   
         nextMonthInvoice.createdAt = new Date(); // Set the date of the invoice to the current date
         nextMonthInvoice.dueDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1); // Due date for next month
+        nextMonthInvoice.createdBy = client;
+
   
         // Save the invoice
         await this.invoiceRepository.save(nextMonthInvoice);
       }
     }
+  }
+
+  async findInvoicesBySubscriberId(subscriberId: number): Promise<Invoice[]> {
+    return await this.invoiceRepository.find({ where: { subscriber: { id: subscriberId } } });
   }
 }

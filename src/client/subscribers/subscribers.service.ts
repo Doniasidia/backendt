@@ -12,6 +12,8 @@ import { Plan } from '@client/plans/plans.entity';
 import { Invoice } from '@client/invoices/invoices.entity';
 import { User } from '@user/user.entity';
 import { Client } from '@admin/client/client.entity';
+import { Subscription } from '@client/subscriptions/subscription.entity';
+import { round } from 'lodash';
 
 
 @Injectable()
@@ -25,6 +27,8 @@ export class SubscriberService {
     private readonly planRepository: Repository<Plan>,
     @InjectRepository(Client) // Inject the Client repository
     private clientRepository: Repository<Client>,
+    @InjectRepository(Subscription) // Inject the Client repository
+    private subscriptionRepository: Repository<Subscription>,
   ) { }
 
  
@@ -43,16 +47,14 @@ export class SubscriberService {
       let plan = null;
       if (subscriberDTO.groupId) {
         group = await this.groupRepository.findOne({ where: { id: subscriberDTO.groupId } });
-
       }
       if (subscriberDTO.planId) {
         plan = await this.planRepository.findOne({ where: { id: subscriberDTO.planId } });
       }
-
+  
       // Fetch the client entity
       const client = await this.clientRepository.findOne({ where: { id: clientId } });
-
-
+  
       // Create a new subscriber object and set its properties
       const newSubscriber = new Subscriber();
       newSubscriber.username = subscriberDTO.username;
@@ -60,21 +62,41 @@ export class SubscriberService {
       newSubscriber.email = subscriberDTO.email;
       newSubscriber.telephone = subscriberDTO.telephone;
       newSubscriber.createdBy = client;
-
+  
       if (group) {
         newSubscriber.groupId = group.id;
       }
       if (plan) {
         newSubscriber.planId = plan.id;
       }
-      // else {
-      //     throw new Error('Either group or plan must be selected');
-      // }
-      const insertResult = await this.subscriberRepository.insert(newSubscriber);
-      const savedSubscriber = await this.subscriberRepository.findOne({
-        where: { id: insertResult.identifiers[0].id }
-      });
-
+  
+      // Save the subscriber to the database
+      const savedSubscriber = await this.subscriberRepository.save(newSubscriber);
+  
+      // Create a new subscription associated with the newly created subscriber
+      const newSubscription = new Subscription();
+      newSubscription.subscriber = savedSubscriber;
+      newSubscription.clientName = client.username; 
+      newSubscription.planName = plan ? plan.name : null; 
+      newSubscription.groupName = group ? group.name : null; 
+  
+      // Determine the amount based on whether the subscriber is associated with a plan directly or through a group
+      if (plan) {
+        newSubscription.amount = round(plan.amount, 3).toString();
+      } else if (group && group.planId) {
+        const groupPlan = await this.planRepository.findOne({ where: { id: group.planId } });
+        if (groupPlan) {
+          newSubscription.amount = round(groupPlan.amount, 3).toString();
+        } else {
+          throw new Error(`Plan not found for group with ID ${group.id}`);
+        }
+      } else {
+        throw new Error(`Plan not found for subscriber with ID ${savedSubscriber.id}`);
+      }
+  
+      // Save the subscription to the database
+      await this.subscriptionRepository.save(newSubscription);
+  
       return savedSubscriber;
     } catch (error) {
       // Handle any errors that occur during the process

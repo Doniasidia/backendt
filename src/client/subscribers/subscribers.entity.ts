@@ -6,6 +6,7 @@ import { Status } from '@enums/status';
 import { Invoice } from '@client/invoices/invoices.entity';
 import { Client } from '@admin/client/client.entity';
 import { User } from '@user/user.entity';
+import { Subscription } from '@client/subscriptions/subscription.entity';
 
 @Entity()
 export class Subscriber extends User{
@@ -32,7 +33,8 @@ export class Subscriber extends User{
 
   @OneToMany(() => Invoice, invoice => invoice.subscriber) // One subscriber can have multiple invoices
   invoices: Invoice[];
-
+  @OneToMany(() => Subscription, subscription => subscription.subscriber) // One subscriber can have multiple invoices
+  subscriptions: Subscription[];
   @ManyToOne(() => Client, client => client.subscribers)
   createdBy: Client;
   @ManyToMany(() => Client, client => client.subscribers) // Many subscribers can belong to many clients

@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
+import { Client } from '@admin/client/client.entity';
 
 @Entity()
 export class Invoice {
@@ -21,4 +22,6 @@ export class Invoice {
 
   @ManyToOne(() => Subscriber, subscriber => subscriber.invoices)
   subscriber: Subscriber; 
+  @ManyToOne(() => Client, client => client.subscribers)
+  createdBy: Client;
 }

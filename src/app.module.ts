@@ -10,7 +10,7 @@ import { Invoice } from '@client/invoices/invoices.entity';
 import { Message } from '@entity/message.entity';
 import { Payment } from '@entity/payment.entity';
 import { Plan } from '@client/plans/plans.entity';
-import { Subscription } from '@client/subscription/subscription.entity';
+import { Subscription } from '@client/subscriptions/subscription.entity';
 import { Sessions } from '@entity/sessions.entity';
 import { Client } from '@admin/client/client.entity';
 import { Admin } from '@entity/admin.entity';
@@ -42,11 +42,13 @@ import { InvoiceController } from '@client/invoices/invoices.controller';
 import { InvoiceService } from '@client/invoices/invoices.service';
 import { InvoiceModule } from '@client/invoices/invoices.module';
 import { jwtConstants } from '@auth/constants';
+import { SubscriptionService } from '@client/subscriptions/subscriptions.service';
+import { SubscriptionController } from '@client/subscriptions/subscriptions.controller';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Client, Plan, Subscriber, Group, Paiement, Invoice]),
+    TypeOrmModule.forFeature([Client, Plan, Subscriber, Group, Paiement, Invoice,Subscription]),
     ConfigModule.forRoot({ envFilePath: '.env', }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -92,7 +94,8 @@ import { jwtConstants } from '@auth/constants';
     SubscriberController,
     GroupsController,
     PaiementsController,
-    InvoiceController
+    InvoiceController,
+    SubscriptionController
   ],
   providers: [
     AppService,
@@ -110,7 +113,8 @@ import { jwtConstants } from '@auth/constants';
     Group,
     Paiement,
     PaiementsService,
-    InvoiceService
+    InvoiceService,
+    SubscriptionService
   ],
 })
 export class AppModule { }
