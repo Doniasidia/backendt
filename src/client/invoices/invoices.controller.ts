@@ -26,8 +26,8 @@ export class InvoiceController {
   @Get('active/subscriptions')
   @UseGuards(AuthGuard) 
 
-  async getAllActiveSubscriptions(): Promise<Subscriber[]> {
-    return await this.invoiceService.getAllActiveSubscriptions();
+  async getAllActiveSubscriptions(@Param('clientId') clientId: string): Promise<Subscriber[]> {
+    return await this.invoiceService.getAllActiveSubscriptions(parseInt(clientId, 10));
   }
  @Post('generateinvoicesnextmonth/:clientId')
  @UseGuards(AuthGuard) 

@@ -46,7 +46,7 @@ export class InvoiceService {
 
   async getAllActiveSubscriptions(clientId: number): Promise<Subscriber[]> {
     // Get all active subscribers belonging to the client
-    return await this.subscriberRepository.find({ where: { client: { id: clientId }, status: Status.ACTIVATED } });
+    return await this.subscriberRepository.find({ where: { id: clientId , status: Status.ACTIVATED } });
 }
 
 
