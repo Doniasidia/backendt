@@ -11,7 +11,6 @@ import { JwtAuthGuard } from '@auth/JwtAuthGuard';
 @Controller('clients')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
-  @UseGuards(JwtAuthGuard)
   @Get('data')
   getClientData(@Request() req) {
     // Assuming the client's ID is stored in the JWT payload

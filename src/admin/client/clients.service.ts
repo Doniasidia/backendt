@@ -7,9 +7,6 @@ import {  Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Status } from '@enums/status';
-import { ClientRepository } from "@user/client.repository";
-
-
 @Injectable()
 export class ClientService {
   constructor(
@@ -32,6 +29,7 @@ export class ClientService {
     newClient.telephone = clientDTO.telephone;
     newClient.password = hashedPassword; 
     newClient.typepack = clientDTO.typepack;
+    newClient.addressLine = clientDTO.addressLine;
     const savedClient = await this.clientRepository.save(newClient);
     return savedClient;
   }
@@ -67,6 +65,9 @@ export class ClientService {
     }
     if (body.typepack !== undefined) {
       client.typepack = body.typepack;
+    }
+    if (body.addressLine !== undefined) {
+      client.addressLine = body.addressLine;
     }
   
     const updatedClient = await this.clientRepository.save(client);

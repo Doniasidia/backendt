@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { Client } from '@admin/client/client.entity';
+import { Subscription } from '@client/subscriptions/subscription.entity';
 
 @Entity()
 export class Invoice {
@@ -12,6 +13,8 @@ export class Invoice {
   @Column()
   subscriberName : string;
   @Column()
+  clientName : string;
+  @Column()
   amount: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -20,8 +23,8 @@ export class Invoice {
   @Column({ type: 'date' })
   dueDate: Date;
 
-  @ManyToOne(() => Subscriber, subscriber => subscriber.invoices)
-  subscriber: Subscriber; 
-  @ManyToOne(() => Client, client => client.subscribers)
+  @OneToOne(() => Subscription, subscription => subscription.invoice)
+  subscription: Subscription; 
+  @ManyToOne(() => Client, client => client.invoices)
   createdBy: Client;
 }

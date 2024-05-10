@@ -17,7 +17,7 @@ import { Subscription } from '@client/subscriptions/subscription.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Subscriber, Group, Plan, Invoice, Client,Subscription]),
+    TypeOrmModule.forFeature([Subscriber, Group, Plan, Client,Subscription,Invoice]),
     GroupsModule,
     PlansModule,
     JwtModule.register({

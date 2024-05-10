@@ -31,8 +31,7 @@ export class Subscriber extends User{
   @Column({ nullable: true, default: null }) // Add planId column
   planId?: number | null;
 
-  @OneToMany(() => Invoice, invoice => invoice.subscriber) // One subscriber can have multiple invoices
-  invoices: Invoice[];
+  
   @OneToMany(() => Subscription, subscription => subscription.subscriber) // One subscriber can have multiple invoices
   subscriptions: Subscription[];
   @ManyToOne(() => Client, client => client.subscribers)

@@ -29,6 +29,8 @@ export class SubscriberService {
     private clientRepository: Repository<Client>,
     @InjectRepository(Subscription) // Inject the Client repository
     private subscriptionRepository: Repository<Subscription>,
+    @InjectRepository(Invoice) // Inject the Client repository
+    private invoiceRepository: Repository<Invoice>,
   ) { }
 
  
@@ -46,10 +48,23 @@ export class SubscriberService {
       let group = null;
       let plan = null;
       if (subscriberDTO.groupId) {
-        group = await this.groupRepository.findOne({ where: { id: subscriberDTO.groupId } });
-      }
-      if (subscriberDTO.planId) {
+        group = await this.groupRepository.findOne({ where: { id: subscriberDTO.groupId }, relations: ["plan"] });
+        if (!group) {
+          throw new NotFoundException(`Group with ID ${subscriberDTO.groupId} not found`);
+        }
+        // Set the planId to the planId of the group if a group is selected
+        if (group.plan) {
+          plan = group.plan;
+        } else {
+          throw new NotFoundException(`Plan not found for the selected group with ID ${subscriberDTO.groupId}`);
+        }
+      } else if (subscriberDTO.planId) {
         plan = await this.planRepository.findOne({ where: { id: subscriberDTO.planId } });
+        if (!plan) {
+          throw new NotFoundException(`Plan with ID ${subscriberDTO.planId} not found`);
+        }
+      } else {
+        throw new Error("Either groupId or planId must be provided.");
       }
   
       // Fetch the client entity
@@ -96,6 +111,25 @@ export class SubscriberService {
   
       // Save the subscription to the database
       await this.subscriptionRepository.save(newSubscription);
+      const newInvoice = new Invoice();
+      
+newInvoice.subscriberId = savedSubscriber.id;
+newInvoice.subscriberName = savedSubscriber.username;
+newInvoice.amount = parseFloat(newSubscription.amount.toString());
+
+// Set the date of the invoice to the current date
+newInvoice.createdAt = new Date();
+
+// Calculate the due date for the invoice (next month)
+const currentDate = new Date();
+const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+newInvoice.dueDate = dueDate;
+newInvoice.createdBy = client;
+newInvoice.clientName = client.username;
+
+
+// Save the invoice to the database
+await this.invoiceRepository.save(newInvoice);
   
       return savedSubscriber;
     } catch (error) {
