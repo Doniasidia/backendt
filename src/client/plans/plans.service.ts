@@ -57,7 +57,9 @@ export class PlansService {
   }
   
 
-
+  async findAll(): Promise<Plan[]> {
+    return await this.planRepository.find();
+  }
   
    
   async getPlanById(id: number): Promise<Plan> {

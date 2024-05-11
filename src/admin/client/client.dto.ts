@@ -24,4 +24,6 @@ export class ClientDTO {
   typepack: string;
   @IsOptional()
   addressLine?: string;
+  @IsOptional()
+  description?: string;
 }

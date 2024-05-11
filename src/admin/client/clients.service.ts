@@ -30,6 +30,8 @@ export class ClientService {
     newClient.password = hashedPassword; 
     newClient.typepack = clientDTO.typepack;
     newClient.addressLine = clientDTO.addressLine;
+    newClient.description = clientDTO.description;
+
     const savedClient = await this.clientRepository.save(newClient);
     return savedClient;
   }
@@ -68,6 +70,9 @@ export class ClientService {
     }
     if (body.addressLine !== undefined) {
       client.addressLine = body.addressLine;
+    }
+    if (body.description !== undefined) {
+      client.description = body.description;
     }
   
     const updatedClient = await this.clientRepository.save(client);

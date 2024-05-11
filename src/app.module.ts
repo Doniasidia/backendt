@@ -80,7 +80,7 @@ import { SubscriptionController } from '@client/subscriptions/subscriptions.cont
     }),
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '10000s' },
+      signOptions: { expiresIn: '100000s' },
     }),
     ClientModule,
     AuthModule,

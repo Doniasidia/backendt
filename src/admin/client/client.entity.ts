@@ -21,6 +21,8 @@ export class Client extends User {
   typepack: string;
   @Column({ nullable: true }) // Optional address line
   addressLine: string;
+  @Column({ nullable: true }) // Optional address line
+  description: string;
   @Column({ type: "enum", enum: Role, default: Role.CLIENT })
   role: Role;
   @OneToMany(() => Subscription, subscription => subscription.subscriber)

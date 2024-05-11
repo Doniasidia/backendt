@@ -27,7 +27,7 @@ import { Subscription } from '@client/subscriptions/subscription.entity';
   ],
   providers: [
     SubscriberService,
-    AuthGuard, // Include AuthGuard if needed
+  
   ],
   controllers: [SubscriberController],
 })
