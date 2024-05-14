@@ -17,6 +17,8 @@ export class SubscriberDTO {
   @IsNotEmpty()
   @IsPhoneNumber('TN') 
   telephone: string;
+  @IsOptional()
+  password: string;
 
  
   @IsOptional()

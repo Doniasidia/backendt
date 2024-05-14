@@ -63,21 +63,26 @@ export class SubscriberService {
         if (!plan) {
           throw new NotFoundException(`Plan with ID ${subscriberDTO.planId} not found`);
         }
-      } else {
-        throw new Error("Either groupId or planId must be provided.");
+     
       }
   
       // Fetch the client entity
       const client = await this.clientRepository.findOne({ where: { id: clientId } });
-  
+
       // Create a new subscriber object and set its properties
       const newSubscriber = new Subscriber();
       newSubscriber.username = subscriberDTO.username;
       newSubscriber.firstname = subscriberDTO.firstname;
       newSubscriber.email = subscriberDTO.email;
       newSubscriber.telephone = subscriberDTO.telephone;
-      newSubscriber.createdBy = client;
-  
+      if (subscriberDTO.password) {
+        const hashedPassword = await bcrypt.hash(subscriberDTO.password, 10);
+        newSubscriber.password = hashedPassword;
+      }      
+      if (clientId) {
+        const client = await this.clientRepository.findOne({ where: { id: clientId } });
+        newSubscriber.createdBy = client;
+      }  
       if (group) {
         newSubscriber.groupId = group.id;
       }
@@ -138,6 +143,53 @@ await this.invoiceRepository.save(newInvoice);
       throw error; // Optionally, you can throw the error to be handled by the caller
     }
   }
+ 
+  async registerSubscriber(subscriberDTO: SubscriberDTO, clientId: number): Promise<Subscriber> {
+    try {
+      let group = null;
+      let plan = null;
+      if (subscriberDTO.groupId) {
+        group = await this.groupRepository.findOne({ where: { id: subscriberDTO.groupId }, relations: ["plan"] });
+        if (!group) {
+          throw new NotFoundException(`Group with ID ${subscriberDTO.groupId} not found`);
+        }
+        if (group.plan) {
+          plan = group.plan;
+        } else {
+          throw new NotFoundException(`Plan not found for the selected group with ID ${subscriberDTO.groupId}`);
+        }
+      } else if (subscriberDTO.planId) {
+        plan = await this.planRepository.findOne({ where: { id: subscriberDTO.planId } });
+        if (!plan) {
+          throw new NotFoundException(`Plan with ID ${subscriberDTO.planId} not found`);
+        }
+      }
+  
+
+      const newSubscriber = new Subscriber();
+      newSubscriber.username = subscriberDTO.username;
+      newSubscriber.firstname = subscriberDTO.firstname;
+      newSubscriber.email = subscriberDTO.email;
+      newSubscriber.telephone = subscriberDTO.telephone;
+      if (subscriberDTO.password) {
+        const hashedPassword = await bcrypt.hash(subscriberDTO.password, 10);
+        newSubscriber.password = hashedPassword;
+      }
+     
+      if (group) {
+        newSubscriber.groupId = group.id;
+      }
+      if (plan) {
+        newSubscriber.planId = plan.id;
+      }
+  
+      const savedSubscriber = await this.subscriberRepository.save(newSubscriber);
+      return savedSubscriber;
+    } catch (error) {
+      console.error('Error registering subscriber:', error);
+      throw error;
+    }
+  }
 
   async deactivateSubscriber(id: number): Promise<Subscriber> {
     const subscriber = await this.subscriberRepository.findOne({ where: { id } });
@@ -170,12 +222,6 @@ await this.invoiceRepository.save(newInvoice);
     if (body.telephone !== undefined) {
       subscriber.telephone = body.telephone;
     }
-
-    /*if (body.password !== undefined) {
-      const hashedPassword = await bcrypt.hash(body.password, 10);
-      subscriber.password = hashedPassword;
-    }*/
-
 
     const updatedSubscriber = await this.subscriberRepository.save(subscriber);
     return updatedSubscriber;

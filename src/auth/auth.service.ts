@@ -70,6 +70,6 @@ export class AuthService {
         redirectTo,
         username: user.username,
         userId: user.id // Include userId in the response
-    };
-  }
+    };
+  }
 }

@@ -35,7 +35,7 @@ export class Subscriber extends User{
   @OneToMany(() => Subscription, subscription => subscription.subscriber) // One subscriber can have multiple invoices
   subscriptions: Subscription[];
   @ManyToOne(() => Client, client => client.subscribers)
-  createdBy: Client;
+  createdBy?: Client;
   @ManyToMany(() => Client, client => client.subscribers) // Many subscribers can belong to many clients
   @JoinTable()
   clients: Client[];

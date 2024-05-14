@@ -61,10 +61,7 @@ export class ClientService {
     if (body.telephone !== undefined) {
       client.telephone = body.telephone;
     }
-    if (body.password !== undefined) {
-      const hashedPassword = await bcrypt.hash(body.password, 10);
-      client.password = hashedPassword;
-    }
+   
     if (body.typepack !== undefined) {
       client.typepack = body.typepack;
     }

@@ -10,7 +10,7 @@ export class User {
   @Column({nullable: true , unique: true })
   email?: string | null;
   @Column({ nullable: true })
-  password: string;
+  password?: string;
   @Column({ unique: true })
   telephone : string;
  

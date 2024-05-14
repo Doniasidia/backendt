@@ -26,8 +26,10 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.4",
+    "@nestjs/platform-socket.io": "^10.3.8",
     "@nestjs/schedule": "^4.0.2",
     "@nestjs/typeorm": "^10.0.2",
+    "@nestjs/websockets": "^10.3.8",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -41,6 +43,7 @@
     "react-datepicker": "^6.7.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5",
     "tailwindcss": "3.3.3",
     "typeorm": "^0.3.20"
   },

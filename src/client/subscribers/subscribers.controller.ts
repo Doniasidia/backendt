@@ -32,6 +32,12 @@ export class SubscriberController {
     const clientId = req.user.sub;
     return await this.subscriberService.createSubscriber(subscriberDTO, clientId);
   }
+  @Post('register')
+  async registerSubscriber(@Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
+    // Implement subscriber self-registration logic here
+    // You may need to validate the data before creating the subscriber
+    return await this.subscriberService.registerSubscriber(subscriberDTO,null);
+  }
 
   @Patch(':id')
   async updateSubscriber(@Param('id', ParseIntPipe) id: number, @Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {

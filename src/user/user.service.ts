@@ -18,6 +18,9 @@ export class UserService {
   async findOneByEmail(emailOrTelephone: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: [{ email: emailOrTelephone }, { telephone: emailOrTelephone }] });
   }
-
+  async getUserById(userId: string) {
+    const id = parseInt(userId); // Assuming clientId is a string
+    return await this.userRepository.findOne({ where: { id } });
+  }
   
 }
