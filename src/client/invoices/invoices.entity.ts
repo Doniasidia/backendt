@@ -27,4 +27,7 @@ export class Invoice {
   subscription: Subscription; 
   @ManyToOne(() => Client, client => client.invoices)
   createdBy: Client;
+  @ManyToOne(() => Subscriber, subscriber => subscriber.invoices)
+  subscriber: Subscriber; 
+
 }

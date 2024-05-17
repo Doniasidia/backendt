@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
+
 @Injectable()
 export class SubscriberRepository {
   private subscriberRepository: Repository<Subscriber>;
@@ -16,8 +17,11 @@ export class SubscriberRepository {
   }
 
   async findOneByEmail(email: string): Promise<Subscriber | undefined> {
-    return this.subscriberRepository.findOne({ where: { email }});
+    return this.subscriberRepository.findOne({ where: { email } });
   }
 
-  
+  async save(subscriber: Subscriber): Promise<Subscriber | undefined> {
+    return this.subscriberRepository.save(subscriber);
+  }
+
 }

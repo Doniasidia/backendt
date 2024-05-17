@@ -30,6 +30,8 @@ export class Subscriber extends User{
 
   @Column({ nullable: true, default: null }) // Add planId column
   planId?: number | null;
+  @Column({ default: false })
+  is_verified: boolean;
 
   
   @OneToMany(() => Subscription, subscription => subscription.subscriber) // One subscriber can have multiple invoices
@@ -39,5 +41,7 @@ export class Subscriber extends User{
   @ManyToMany(() => Client, client => client.subscribers) // Many subscribers can belong to many clients
   @JoinTable()
   clients: Client[];
-  
+  @OneToMany(() => Invoice, invoice => invoice.subscriber) // One subscriber can have multiple invoices
+  invoices: Invoice[];
+
 }

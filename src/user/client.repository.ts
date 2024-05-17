@@ -16,6 +16,10 @@ export class ClientRepository {
   }
 
   async findOneByEmail(email: string): Promise<Client | undefined> {
-    return this.clientRepository.findOne({ where: { email}});
+    return this.clientRepository.findOne({ where: { email } });
+  }
+
+  async save(client: Client): Promise<Client> {
+    return this.clientRepository.save(client);
   }
 }

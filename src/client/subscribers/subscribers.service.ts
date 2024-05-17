@@ -14,6 +14,7 @@ import { User } from '@user/user.entity';
 import { Client } from '@admin/client/client.entity';
 import { Subscription } from '@client/subscriptions/subscription.entity';
 import { round } from 'lodash';
+import { AuthService } from '@auth/auth.service';
 
 
 @Injectable()
@@ -31,6 +32,8 @@ export class SubscriberService {
     private subscriptionRepository: Repository<Subscription>,
     @InjectRepository(Invoice) // Inject the Client repository
     private invoiceRepository: Repository<Invoice>,
+    private authService: AuthService,
+
   ) { }
 
  
@@ -98,6 +101,8 @@ export class SubscriberService {
       newSubscription.subscriber = savedSubscriber;
       newSubscription.clientName = client.username; 
       newSubscription.planName = plan ? plan.name : null; 
+      newSubscription.type = plan ? plan.type : null; 
+
       newSubscription.groupName = group ? group.name : null; 
   
       // Determine the amount based on whether the subscriber is associated with a plan directly or through a group
@@ -113,7 +118,34 @@ export class SubscriberService {
       } else {
         throw new Error(`Plan not found for subscriber with ID ${savedSubscriber.id}`);
       }
-  
+      newSubscription.startDate = plan.type === 'personnalisé' ? plan.startDate : new Date();
+
+
+      let endDate: Date;
+      switch (plan.type) {
+        case 'annuel':
+          endDate = new Date(newSubscription.startDate);
+          endDate.setFullYear(endDate.getFullYear() + 1); // Ajouter un an à la date de création
+          break;
+        case 'mensuel':
+          endDate = new Date(newSubscription.startDate);
+          endDate.setMonth(endDate.getMonth() + 1); // Ajouter un mois à la date de création
+          break;
+        case 'Par session':
+          endDate = new Date(newSubscription.startDate);
+          endDate.setDate(endDate.getDate() + 1); // Ajouter un jour à la date de création
+          break;
+        case 'personnalisé':
+          // La date d'échéance est définie par l'utilisateur, utilisez donc startDate et endDate
+          // de l'abonnement personnalisé pour définir la date d'échéance
+          endDate = new Date(plan.endDate);
+          break;
+        default:
+          throw new Error('Type d\'abonnement non pris en charge');
+      }
+
+      // Enregistrer la date d'échéance dans la base de données
+      newSubscription.endDate = endDate;
       // Save the subscription to the database
       await this.subscriptionRepository.save(newSubscription);
       const newInvoice = new Invoice();
@@ -123,12 +155,9 @@ newInvoice.subscriberName = savedSubscriber.username;
 newInvoice.amount = parseFloat(newSubscription.amount.toString());
 
 // Set the date of the invoice to the current date
-newInvoice.createdAt = new Date();
+newInvoice.createdAt = newSubscription.startDate;
 
-// Calculate the due date for the invoice (next month)
-const currentDate = new Date();
-const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-newInvoice.dueDate = dueDate;
+newInvoice.dueDate = newSubscription.endDate;
 newInvoice.createdBy = client;
 newInvoice.clientName = client.username;
 
@@ -136,13 +165,54 @@ newInvoice.clientName = client.username;
 // Save the invoice to the database
 await this.invoiceRepository.save(newInvoice);
   
-      return savedSubscriber;
-    } catch (error) {
-      // Handle any errors that occur during the process
-      console.error('Error creating subscriber:', error);
-      throw error; // Optionally, you can throw the error to be handled by the caller
+     // generate email token
+     const token = await this.authService.createEmailToken(savedSubscriber.email);
+     // send email
+     const sent = await this.authService.sendVerifyEmail(savedSubscriber.email, token);
+
+     if (sent) {
+       return savedSubscriber;
+     } else {
+       throw new Error(`Email not sent ${savedSubscriber.id}`);
+     }
+   } catch (error) {
+     // Handle any errors that occur during the process
+     console.error('Error creating subscriber:', error);
+     throw error; // Optionally, you can throw the error to be handled by the caller
+   }
+ }
+ 
+ async addPasswordForSubscriber(email: string, body: { password: string }): Promise<Subscriber> {
+  try {
+    // Find the subscriber
+    const subscriber = await this.subscriberRepository.findOne({ where: { email } });
+
+    // If subscriber not found, throw an error
+    if (!subscriber) {
+      throw new NotFoundException(`Subscriber with email ${email} not found`);
     }
+
+    // If subscriber's email is not verified, throw an error
+    if (!subscriber.is_verified) {
+      throw new Error(`Your email is not verified. Please verify your email before adding a password.`);
+    }
+
+    // If a password is provided, hash it and add it to the subscriber
+    if (body.password !== undefined) {
+      const hashedPassword = await bcrypt.hash(body.password, 10);
+      subscriber.password = hashedPassword;
+    }
+
+    // Save and Return the updated subscriber
+    return await this.subscriberRepository.save(subscriber);
+  } catch (error) {
+    // Handle errors and return a friendly message
+    throw new Error(`Failed to add password: ${error.message}`);
   }
+}
+
+
+
  
   async registerSubscriber(subscriberDTO: SubscriberDTO, clientId: number): Promise<Subscriber> {
     try {

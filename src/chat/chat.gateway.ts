@@ -1,46 +1,69 @@
-/*import { Injectable } from '@nestjs/common';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket, OnGatewayDisconnect, OnGatewayConnection } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Message } from './mesage.interface';
-import { UserService } from '@user/user.service';
+import { Injectable,OnModuleInit } from '@nestjs/common';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
+import { ClientService } from '@admin/client/clients.service';
+import { Message } from './message.interface';
 
+@WebSocketGateway({ cors: true })
 @Injectable()
-export class ChatGateway {
-  constructor(public readonly server: Server, private readonly subscriberService: SubscriberService) {}
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
+  @WebSocketServer()
+  server: Server;
 
-  async handleJoin(client: Socket, subscriberId: number) {
-    // Validate subscriber ID and retrieve user data (if applicable)
-    const subscriber = await this.subscriberService.getSubscriberById(subscriberId);
-    if (!subscriber) {
-      console.error(`Invalid subscriber ID: ${subscriberId}`);
-      return;
+  constructor(
+    private readonly subscriberService: SubscriberService,
+    private readonly clientService: ClientService
+  ) {}
+
+  onModuleInit() {
+    this.server.on('connection', (socket: Socket) => {
+      console.log('Client connected!', socket.id);
+    });
+  }
+
+  async handleConnection(client: Socket) {
+    const { role, userId } = client.handshake.query;
+
+    if (role && userId) {
+      await this.handleJoin(client, role as string, parseInt(userId as string));
+    } else {
+      client.disconnect();
     }
-
-    // Join client to a room specific to the subscriber
-    client.join(`subscriber-${subscriberId}`);
-
-    // Optionally, send a welcome message or retrieve historical messages
-    // for the subscriber upon joining the room
-    client.emit('welcome', { message: `Welcome to the chat, ${subscriber.username}` });
-    // Or fetch and emit historical messages using a separate event
   }
 
-  async handleMessage(client: Socket, message: Message) {
-    // ... (existing validation and user data retrieval logic)
-  
-    const formattedMessage: Message & { senderName: string } = {
-      ...message,
-      senderName,
-    };
-  
-    // Broadcast message to the recipient's room and the sender's room (optional for self-messaging)
-    client.to(`subscriber-${message.recipientId}`).emit('chat-message', formattedMessage);
-    client.to(`subscriber-${message.senderId}`).emit('chat-message', formattedMessage); // Optional for self-messaging
+  async handleDisconnect(client: Socket) {
+    // Optional: Handle cleanup
   }
 
-  private sanitizeMessageContent(content: string): string {
-    // Implement logic to sanitize message content using appropriate libraries
-    // (e.g., DOMPurify, sanitize-html)
-    return content; // Replace with actual sanitization logic
+  async handleJoin(client: Socket, userType: string, userId: number) {
+    if (userType === 'subscriber') {
+      const subscriber = await this.subscriberService.getSubscriberById(userId);
+      if (subscriber) {
+        client.join(`subscriber-${userId}`);
+        client.emit('welcome', { message: `Welcome, ${subscriber.username}` });
+      } else {
+        client.disconnect();
+      }
+    } else if (userType === 'client') {
+      const clientUser = await this.clientService.getClientById(userId);
+      if (clientUser) {
+        client.join(`client-${userId}`);
+        client.emit('welcome', { message: `Welcome, ${clientUser.username}` });
+      } else {
+        client.disconnect();
+      }
+    } else {
+      client.disconnect();
+    }
   }
-} */
+
+  @SubscribeMessage('chat-message')
+  async handleMessage(@MessageBody() message: Message, @ConnectedSocket() client: Socket) {
+    const recipientRoom = message.recipientType === 'subscriber'
+      ? `subscriber-${message.recipientId}`
+      : `client-${message.recipientId}`;
+
+    this.server.to(recipientRoom).emit('chat-message', message);
+  }
+}

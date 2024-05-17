@@ -15,6 +15,12 @@ export class Subscription {
   clientName: string;
   @Column({ nullable: true})
   planName?: string;
+  @Column({ type: 'date' , nullable: true})
+  startDate?: Date;
+  @Column({ type: 'date', nullable: true })
+  endDate?: Date;
+  @Column({ nullable: true})
+  type?: string;
   @ManyToOne(() => Subscriber, subscriber => subscriber.subscriptions)
   subscriber: Subscriber; 
  
@@ -25,6 +31,6 @@ export class Subscription {
   @JoinColumn() 
   invoice: Invoice; 
  @Column({ type: "enum", enum: Status, default: Status.ACTIVATED })
-  status: Status;
+  status: Status;
   
 }

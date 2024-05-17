@@ -44,8 +44,11 @@ import { InvoiceModule } from '@client/invoices/invoices.module';
 import { jwtConstants } from '@auth/constants';
 import { SubscriptionService } from '@client/subscriptions/subscriptions.service';
 import { SubscriptionController } from '@client/subscriptions/subscriptions.controller';
-//import { ChatGateway } from './chat/chat.gateway';
 import { Server } from 'socket.io';
+import { EmailVerification } from '@entity/emailverification.entity';
+import { CommonModule } from './common/common.module';
+import { ChatGateway } from './chat/chat.gateway';
+
 
 @Module({
   imports: [
@@ -74,7 +77,9 @@ import { Server } from 'socket.io';
           Subscriber,
           Client,
           Admin,
-          User
+          User,
+          EmailVerification,
+
         ],
         synchronize: true,
       }),
@@ -84,6 +89,7 @@ import { Server } from 'socket.io';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '100000s' },
     }),
+    CommonModule,
     ClientModule,
     AuthModule,
     UserModule,
@@ -117,12 +123,8 @@ import { Server } from 'socket.io';
     PaiementsService,
     InvoiceService,
     SubscriptionService,
-    //ChatGateway,
-   Server
+    ChatGateway,
+   
   ],
 })
-export class AppModule { /*constructor(private readonly chatGateway: ChatGateway) {
-  this.chatGateway.server.on('connection', (socket) => {
-    console.log('Client connected!');
-  });
-}*/ }
+export class AppModule { }

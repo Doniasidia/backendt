@@ -9,8 +9,8 @@ import { AuthGuard } from '@auth/auth.guard';
 export class SubscriberController {
   constructor(private readonly subscriberService: SubscriberService) { }
 
- 
-   @Get()
+
+  @Get()
   @UseGuards(AuthGuard) // Apply the authentication guard to protect this endpoint
   async getAllSubscribers(@Request() req): Promise<Subscriber[]> {
     // Check if req.user and req.user.sub are defined
@@ -21,12 +21,12 @@ export class SubscriberController {
     // Get the user ID from the request object (assuming it's stored in the user property)
     const clientId = req.user.sub;
     return await this.subscriberService.findSubscribersByClientId(clientId);
-  
-  // Other controller methods...
-}
+
+    // Other controller methods...
+  }
 
   @Post()
-  @UseGuards(AuthGuard) 
+  @UseGuards(AuthGuard)
   async createSubscriber(@Body() subscriberDTO: SubscriberDTO, @Request() req): Promise<Subscriber> {
     // Get the user ID from the request object (assuming it's stored in the user property)
     const clientId = req.user.sub;
@@ -36,12 +36,17 @@ export class SubscriberController {
   async registerSubscriber(@Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
     // Implement subscriber self-registration logic here
     // You may need to validate the data before creating the subscriber
-    return await this.subscriberService.registerSubscriber(subscriberDTO,null);
+    return await this.subscriberService.registerSubscriber(subscriberDTO, null);
   }
 
   @Patch(':id')
   async updateSubscriber(@Param('id', ParseIntPipe) id: number, @Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
     return await this.subscriberService.updateSubscriber(id, subscriberDTO);
+  }
+
+  @Patch(':email/add-password')
+  async addPasswordForSubscriber(@Param('email') email: string, @Body() body: { password: string }): Promise<Subscriber> {
+    return await this.subscriberService.addPasswordForSubscriber(email, body);
   }
 
   @Patch(':id/deactivate')
