@@ -15,12 +15,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailVerification } from '@entity/emailverification.entity';
 import { ConfigModule } from '@nestjs/config';
 import { SubscriberModule } from '@client/subscribers/subscribers.module';
+import { ForgotPassword } from '@entity/forgotpassword.entity';
 
 @Module({
   imports: [
     UserModule,
     ConfigModule.forRoot({ envFilePath: '.env', }),
-    TypeOrmModule.forFeature([EmailVerification]),
+    TypeOrmModule.forFeature([EmailVerification, ForgotPassword]),
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '100000s' },

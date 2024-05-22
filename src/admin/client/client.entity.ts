@@ -19,21 +19,31 @@ export class Client extends User {
 
   @Column({ nullable: true })
   typepack: string;
+
   @Column({ nullable: true }) // Optional address line
   addressLine: string;
+
   @Column({ nullable: true }) // Optional address line
   description: string;
+
+  @Column({ default: false })
+  is_verified: boolean;
+
   @Column({ type: "enum", enum: Role, default: Role.CLIENT })
   role: Role;
-  @OneToMany(() => Subscription, subscription => subscription.subscriber)
+
+  @OneToMany(() => Subscription, subscription => subscription.subscriber, { nullable: true })
   subscriptions: Subscription[];
-  @ManyToMany(() => Plan, plan => plan.clients) // Many clients can have many plans
+
+  @ManyToMany(() => Plan, plan => plan.clients, { nullable: true }) // Many clients can have many plans
   plans: Plan[];
-  
-  @OneToMany(() => Group, group => group.createdBy) 
-  groups:Group[];
-  @ManyToMany(() => Subscriber, subscriber => subscriber.clients) 
-  subscribers: Subscriber[];
-  @OneToMany(() => Invoice, invoice => invoice.createdBy) 
-  invoices:Invoice[];
+
+  @OneToMany(() => Group, group => group.createdBy, { nullable: true })
+  groups: Group[];
+
+  @ManyToMany(() => Subscriber, subscriber => subscriber.clients, { nullable: true })
+  subscribers: Subscriber[];
+
+  @OneToMany(() => Invoice, invoice => invoice.createdBy, { nullable: true })
+  invoices: Invoice[];
 }

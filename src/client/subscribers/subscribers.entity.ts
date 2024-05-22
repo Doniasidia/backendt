@@ -9,17 +9,17 @@ import { User } from '@user/user.entity';
 import { Subscription } from '@client/subscriptions/subscription.entity';
 
 @Entity()
-export class Subscriber extends User{
+export class Subscriber extends User {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   firstname: string;
 
-  @ManyToOne(() => Group, group => group.subscribers) // Many subscribers belong to one group
+  @ManyToOne(() => Group, group => group.subscribers, { nullable: true }) // Many subscribers belong to one group
   group: Group;
 
-  @ManyToOne(() => Plan, plan => plan.subscribers) // Many subscribers belong to one plan
+  @ManyToOne(() => Plan, plan => plan.subscribers, { nullable: true }) // Many subscribers belong to one plan
   plan: Plan;
 
   @Column({ type: "enum", enum: Status, default: Status.ACTIVATED })
@@ -30,18 +30,21 @@ export class Subscriber extends User{
 
   @Column({ nullable: true, default: null }) // Add planId column
   planId?: number | null;
+
   @Column({ default: false })
   is_verified: boolean;
 
-  
-  @OneToMany(() => Subscription, subscription => subscription.subscriber) // One subscriber can have multiple invoices
+  @OneToMany(() => Subscription, subscription => subscription.subscriber, { nullable: true }) // One subscriber can have multiple invoices
   subscriptions: Subscription[];
-  @ManyToOne(() => Client, client => client.subscribers)
-  createdBy?: Client;
-  @ManyToMany(() => Client, client => client.subscribers) // Many subscribers can belong to many clients
+
+  @ManyToOne(() => Client, client => client.subscribers, { nullable: true })
+  createdBy?: Client;
+
+  @ManyToMany(() => Client, client => client.subscribers, { nullable: true }) // Many subscribers can belong to many clients
   @JoinTable()
   clients: Client[];
-  @OneToMany(() => Invoice, invoice => invoice.subscriber) // One subscriber can have multiple invoices
+
+  @OneToMany(() => Invoice, invoice => invoice.subscriber, { nullable: true }) // One subscriber can have multiple invoices
   invoices: Invoice[];
 
 }

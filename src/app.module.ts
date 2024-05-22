@@ -45,15 +45,20 @@ import { jwtConstants } from '@auth/constants';
 import { SubscriptionService } from '@client/subscriptions/subscriptions.service';
 import { SubscriptionController } from '@client/subscriptions/subscriptions.controller';
 import { Server } from 'socket.io';
+import { ChatGateway } from './chat/chat.gateway';
 import { EmailVerification } from '@entity/emailverification.entity';
 import { CommonModule } from './common/common.module';
-import { ChatGateway } from './chat/chat.gateway';
+import { ForgotPassword } from '@entity/forgotpassword.entity';
+import { Notification } from '@client/notification/notification.entity';
+import { NotificationService } from '@client/notification/notification.service';
+import { NotificationController } from '@client/notification/notification.controller';
+
 
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forFeature([Client, Plan, Subscriber, Group, Paiement, Invoice,Subscription]),
+    TypeOrmModule.forFeature([Client, Plan, Subscriber, Group, Paiement, Invoice,Subscription,ForgotPassword,Notification]),
     ConfigModule.forRoot({ envFilePath: '.env', }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -79,6 +84,8 @@ import { ChatGateway } from './chat/chat.gateway';
           Admin,
           User,
           EmailVerification,
+          ForgotPassword,
+          Notification,
 
         ],
         synchronize: true,
@@ -93,7 +100,8 @@ import { ChatGateway } from './chat/chat.gateway';
     ClientModule,
     AuthModule,
     UserModule,
-    SubscriberModule
+    SubscriberModule,
+  
   ],
   controllers: [
     AppController,
@@ -103,7 +111,8 @@ import { ChatGateway } from './chat/chat.gateway';
     GroupsController,
     PaiementsController,
     InvoiceController,
-    SubscriptionController
+    SubscriptionController,
+    NotificationController,
   ],
   providers: [
     AppService,
@@ -124,7 +133,7 @@ import { ChatGateway } from './chat/chat.gateway';
     InvoiceService,
     SubscriptionService,
     ChatGateway,
-   
+    NotificationService,
   ],
 })
 export class AppModule { }

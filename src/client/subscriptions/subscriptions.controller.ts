@@ -1,7 +1,8 @@
 // subscription.controller.ts
-import { Controller, Get, Post, Body, ParseIntPipe, Param, Req, UnauthorizedException, Request, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, ParseIntPipe, Param, Req, UnauthorizedException, Request, NotFoundException, BadRequestException } from '@nestjs/common';
 import { SubscriptionService } from './subscriptions.service';
 import { Subscription } from './subscription.entity';
+import { SubscriptionDTO } from './subscriptions.dto';
 
 @Controller('subscriptions')
 export class SubscriptionController {
@@ -14,4 +15,12 @@ export class SubscriptionController {
     }
     return subscriptions;
   }
+  @Post()
+  async createSubscription(
+   
+    @Body() subscriptionDTO: SubscriptionDTO
+  ): Promise<Subscription> {
+    return this.subscriptionService.createSubscription(subscriptionDTO);
+  }
+
 }

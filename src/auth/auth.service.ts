@@ -7,11 +7,12 @@ import { ClientRepository } from "@user/client.repository";
 import { Role } from '@enums/role';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailVerification } from '@entity/emailverification.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import * as nodemailer from 'nodemailer';
 import * as smtpTransport from 'nodemailer-smtp-transport';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { SubscriberRepository } from '@user/subscriber.repository';
+import { ForgotPassword } from '@entity/forgotpassword.entity';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,9 @@ export class AuthService {
         private adminRepository: AdminRepository,
         private subscriberRepository: SubscriberRepository,
         @InjectRepository(EmailVerification)
-        private readonly emailVerificationRepository: Repository<EmailVerification>
+        private readonly emailVerificationRepository: Repository<EmailVerification>,
+        @InjectRepository(ForgotPassword)
+        private readonly forgotPasswordRepository: Repository<ForgotPassword>,
     ) {
         this.transport = nodemailer.createTransport(smtpTransport({
             service: "Gmail",
@@ -58,7 +61,9 @@ export class AuthService {
                 if (user) {
                     role = Role.CLIENT;
                     redirectTo = '/client/dashboard'; // Redirect URL for clients
-                }}}
+                }
+            }
+        }
         if (!user) {
             // If user doesn't exist in any repository, throw UnauthorizedException
             throw new UnauthorizedException('Invalid credentials');
@@ -87,15 +92,21 @@ export class AuthService {
         };
     }
 
-    async createEmailToken(email: string): Promise<number> {
-        const subscriber = await this.subscriberRepository.findOneByEmail(email);
-
+    async createEmailToken(email: string, isClient: boolean = false): Promise<number> {
+        let user: any;
         let emailVerification = new EmailVerification();
-        emailVerification.subscriber = subscriber;
+
+        if (isClient) {
+            user = await this.clientRepository.findOneByEmail(email)
+            emailVerification.client = user;
+        } else {
+            user = await this.subscriberRepository.findOneByEmail(email)
+            emailVerification.subscriber = user;
+        }
+
         emailVerification.token = Math.floor(Math.random() * (9000000)) + 1000000;
         emailVerification.timestamp = new Date();
-        emailVerification.email = subscriber.email;
-        emailVerification.emailToken = emailVerification.token;
+        emailVerification.email = user.email;
         await this.emailVerificationRepository.save(emailVerification);
 
         return emailVerification.token;
@@ -116,8 +127,8 @@ export class AuthService {
         }
     }
 
-    async sendVerifyEmail(email: string, token: number): Promise<boolean> {
-        let verifyUrl = `${process.env.REDIRECT_HOST}/confirmationmdp?token=${token}&email=${email}`;
+    async sendVerifyEmail(email: string, token: number, isClient: boolean = false): Promise<boolean> {
+        let verifyUrl = `${process.env.REDIRECT_HOST}/confirmationmdp?token=${token}&email=${email}&client=${isClient}`;
         let htmlContent = "<p>Visit this link to verify your email address:</p>";
         htmlContent += '<a href=' + verifyUrl + '>' + verifyUrl + '</a>';
         htmlContent += '<p>Please do not reply to this notification, this inbox is not monitored.</p>';
@@ -149,7 +160,7 @@ export class AuthService {
 
     }
 
-    async verifyEmail(token: number): Promise<boolean> {
+    async verifySubscriberEmail(token: number): Promise<boolean> {
         const emailVerification = await this.emailVerificationRepository.findOne({ where: { token: token } });
         if (emailVerification && emailVerification.email) {
             const userData = await this.subscriberRepository.findOneByEmail(emailVerification.email);
@@ -166,159 +177,157 @@ export class AuthService {
         return true;
     }
 
-    async emailResetedPassword(email: string, password: string): Promise<boolean> {
+    async verifyClientEmail(token: number): Promise<boolean> {
+        const emailVerification = await this.emailVerificationRepository.findOne({ where: { token: token } });
+        if (emailVerification && emailVerification.email) {
+            const userData = await this.clientRepository.findOneByEmail(emailVerification.email);
+            if (userData) {
+                userData.is_verified = true;
+                const savedUser = await this.clientRepository.save(userData);
+                await this.emailVerificationRepository.delete({ token: token });
+                console.log(!!savedUser, !!savedUser.is_verified);
+                return !!savedUser;
+            }
+        } else {
+            throw new HttpException('LOGIN.EMAIL_CODE_NOT_VALID', HttpStatus.FORBIDDEN);
+        }
+        return true;
+    }
 
-        let htmlContent = "<p>Your new password is: " + password + " </p>";
-        htmlContent += '<p>Please do not reply to this notification, this inbox is not monitored.</p>';
-        htmlContent += '<p>If you are having a problem with your account, please email ' + process.env.CONTACT_EMAIL + '</p>';
-        htmlContent += '<p>Thanks for using the app</p>';
-
-        var mailOptions = {
-            from: process.env.CONTACT_EMAIL,
-            to: email,
-            subject: 'Usms forgotten password confirmation',
-            html: htmlContent,
-        };
-
+    async sendEmailForgotPassword(email: string): Promise<boolean> {
         let authService = this;
-        try {
-            var sent = await new Promise<boolean>(async function (resolve, reject) {
-                return await authService.transport.sendMail(mailOptions, async (error: any, info: any) => {
+        let isClient = false;
+        let userData: any = await this.subscriberRepository.findOneByEmail(email);
+
+        if (!userData) {
+            userData = await this.clientRepository.findOneByEmail(email);
+            isClient = true;
+        }
+        if (!userData) throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
+
+        let tokenModel: ForgotPassword;
+
+        if (isClient) {
+            tokenModel = await this.createClientForgottenPasswordToken(email)
+        } else {
+            tokenModel = await this.createSubscriberForgottenPasswordToken(email)
+        }
+
+        if (tokenModel && tokenModel.token) {
+
+            let url = `${process.env.REDIRECT_HOST}/reset-password?token=${tokenModel.token}&client=${isClient}`;
+
+
+            let mailOptions = {
+                from: process.env.CONTACT_EMAIL,
+                to: email, // list of receivers (separated by ,)
+                subject: 'USMS Reset password code',
+                text: 'Forgot Password',
+                html: 'Hello <br><br> We have received a request to reset your password for your account with email : <strong>'
+                    + email + '</strong><br/><br/>'
+                    + "If you didn't make this request, please disregard this email or contact our support team at <strong>" + process.env.CONTACT_EMAIL + "</strong>.<br/><br/> Otherwise, you can reset your password using this link:<br/><br/>"
+                    + '<a href=' + url + '>' + url + '</a>'  // html body
+            };
+
+            var sended = await new Promise<boolean>(async function (resolve, reject) {
+                return authService.transport.sendMail(mailOptions, async (error: any, info: any) => {
                     if (error) {
+                        console.log('Message sent: %s', error);
                         return reject(false);
                     }
+                    console.log('Message sent: %s', info.messageId);
                     resolve(true);
                 });
             })
-            return sent;
-        } catch (error) {
-            return false;
-        }
 
-    }
-    async forgotPassword(email: string): Promise<void> {
-        const user = await this.subscriberRepository.findOneByEmail(email);
-        if (!user) {
-          throw new UnauthorizedException("User not found");
-        }
-        const resetTokenSubscriber = await this.createEmailToken(email); // Rename variable to avoid redeclaration
-        const sentSubscriber = await this.sendVerifyEmail(email, resetTokenSubscriber); // Rename variable to avoid redeclaration
-        if (!sentSubscriber) {
-          throw new UnauthorizedException("Failed to send reset email");
-        }
-    
-        const client = await this.clientRepository.findOneByEmail(email); // Rename variable to avoid redeclaration
-        if (!client) {
-            throw new UnauthorizedException("User not found");
-        }
-        const resetTokenClient = await this.createEmailToken(email); // Rename variable to avoid redeclaration
-        const sentClient = await this.sendVerifyEmail(email, resetTokenClient); // Rename variable to avoid redeclaration
-        if (!sentClient) {
-            throw new UnauthorizedException("Failed to send reset email");
+            return sended;
+        } else {
+            throw new HttpException('REGISTER.USER_NOT_REGISTERED', HttpStatus.FORBIDDEN);
         }
     }
-    
-      
-    /* async sendVerificationEmail(email: string, token: number): Promise<boolean> {
-        // Construct verification link with token
-        const verifyUrl = `${process.env.REDIRECT_HOST}/verify-email/${token}`;
-        
-        // Compose email content
-        const htmlContent = `
-            <p>Click the following link to verify your email:</p>
-            <a href="${verifyUrl}">${verifyUrl}</a>
-        `;
-    
-        // Send the email using your email service
+
+    async createSubscriberForgottenPasswordToken(email: string): Promise<ForgotPassword> {
+        let userData = await this.subscriberRepository.findOneByEmail(email);
+        let forgotPassword = await this.forgotPasswordRepository.findOne({ where: { subscriber: userData } });
+        if (forgotPassword && ((new Date().getTime() - forgotPassword.timestamp.getTime()) / 60000 < 15)) {
+            throw new HttpException('RESET_PASSWORD.EMAIL_SENDED_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+
+            if (!forgotPassword) {
+                forgotPassword = new ForgotPassword();
+                forgotPassword.subscriber = userData;
+            }
+
+            forgotPassword.token = Math.floor(Math.random() * (9000000)) + 1000000;
+            forgotPassword.timestamp = new Date();
+
+            let ret = await this.forgotPasswordRepository.save(forgotPassword);
+
+            if (ret) {
+                return ret;
+            } else {
+                throw new HttpException('LOGIN.ERROR.GENERIC_ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+
+    async createClientForgottenPasswordToken(email: string): Promise<ForgotPassword> {
+        let userData = await this.clientRepository.findOneByEmail(email);
+        let forgotPassword = await this.forgotPasswordRepository.findOne({ where: { client: userData } });
+        if (forgotPassword && ((new Date().getTime() - forgotPassword.timestamp.getTime()) / 60000 < 15)) {
+            throw new HttpException('RESET_PASSWORD.EMAIL_SENDED_RECENTLY', HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+
+            if (!forgotPassword) {
+                forgotPassword = new ForgotPassword();
+                forgotPassword.client = userData;
+            }
+
+            forgotPassword.token = Math.floor(Math.random() * (9000000)) + 1000000;
+            forgotPassword.timestamp = new Date();
+
+            let ret = await this.forgotPasswordRepository.save(forgotPassword);
+
+            if (ret) {
+                return ret;
+            } else {
+                throw new HttpException('LOGIN.ERROR.GENERIC_ERROR', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    }
+
+    async subscriberResetPassword(token: number, password: string): Promise<UpdateResult> {
         try {
-            const sent = await this.sendEmail(email, "Email Verification", htmlContent);
-            return sent; // Return the result of sending the email
+            let forgotPassword = await this.forgotPasswordRepository.findOne({ relations: ["subscriber"], where: { token: token } });
+            if (forgotPassword.subscriber) {
+                forgotPassword.subscriber.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+                const update = await this.subscriberRepository.update(forgotPassword.subscriber);
+                await this.forgotPasswordRepository.delete({ token: token });
+                return update;
+            } else {
+                throw new HttpException('LOGIN.ERROR.RESULT_FAIL', HttpStatus.UNAUTHORIZED);
+            }
+
         } catch (error) {
-            console.error("Error sending verification email:", error);
-            return false; // Return false if an error occurs
+            throw new HttpException('LOGIN.ERROR.RESULT_FAIL', HttpStatus.UNAUTHORIZED);
         }
     }
-    async sendEmail(to: string, subject: string, htmlContent: string): Promise<boolean> {
-        // Implement logic to send email using nodemailer or your email service
-        // For example:
-        const mailOptions = {
-            from: process.env.CONTACT_EMAIL,
-            to: to,
-            subject: subject,
-            html: htmlContent,
-        };
-    
+
+    async clientResetPassword(token: number, password: string): Promise<UpdateResult> {
         try {
-            const sent = await new Promise<boolean>((resolve, reject) => {
-                return this.transport.sendMail(mailOptions, (error: any, info: any) => {
-                    if (error) {
-                        console.error("Error sending email:", error);
-                        return reject(false);
-                    }
-                    resolve(true);
-                });
-            });
-            return sent;
+            let forgotPassword = await this.forgotPasswordRepository.findOne({ relations: ["client"], where: { token: token } });
+            if (forgotPassword.client) {
+                forgotPassword.client.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+                const update = await this.clientRepository.update(forgotPassword.client);
+                await this.forgotPasswordRepository.delete({ token: token });
+                return update;
+            } else {
+                throw new HttpException('LOGIN.ERROR.RESULT_FAIL', HttpStatus.UNAUTHORIZED);
+            }
+
         } catch (error) {
-            console.error("Error sending email:", error);
-            return false;
+            throw new HttpException('LOGIN.ERROR.RESULT_FAIL', HttpStatus.UNAUTHORIZED);
         }
     }
-  // AuthService - verifyEmail method
-// AuthService - verifyEmail method
-async verifiEmail(token: number): Promise<boolean> {
-    // Find email verification record by token
-    const emailVerification = await this.emailVerificationRepository.findOne({ where: { token: token } });
-    if (emailVerification && emailVerification.email) {
-        // Find user by email
-        const userData = await this.subscriberRepository.findOneByEmail(emailVerification.email);
-        if (userData) {
-            // Mark user as verified
-            userData.is_verified = true;
-            const savedUser = await this.subscriberRepository.save(userData);
-            await this.emailVerificationRepository.delete({ token: token });
-            console.log('User verified:', savedUser);
-            return true; // User verified successfully
-        }
-    } else {
-        // Email verification record not found
-        console.error('Invalid email verification token:', token);
-        return false; // Verification failed
-    }
-}
-
-async createEmaiToken(email: string): Promise<number> {
-    // Generate a random verification token
-    const token = Math.floor(Math.random() * (9000000)) + 1000000;
-    
-    // Save the token in the database along with the subscriber's email
-    // You can use your existing EmailVerification entity for this
-    const emailVerification = new EmailVerification();
-    emailVerification.email = email;
-    emailVerification.token = token;
-    await this.emailVerificationRepository.save(emailVerification);
-    
-    return token;
-}     
-
-async sendVerifiEmail(email: string, token: number): Promise<boolean> {
-    // Construct verification URL with token appended
-    const verifyUrl = `${process.env.REDIRECT_HOST}/login?token=${token}`;
-    
-    // Compose email content
-    const htmlContent = `
-        <p>Click the following link to verify your email:</p>
-        <a href="${verifyUrl}">${verifyUrl}</a>
-    `;
-    
-    // Send the email using your email service
-    try {
-        const sent = await this.sendEmail(email, "Email Verification", htmlContent);
-        return sent; // Return the result of sending the email
-    } catch (error) {
-        console.error("Error sending verification email:", error);
-        return false; // Return false if an error occurs
-    }
-}
-*/
 }

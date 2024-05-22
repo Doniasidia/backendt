@@ -1,9 +1,12 @@
 //subscriber.controller
-import { Controller, Get, Post, Request, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Request, Param, Body, UseGuards, NotFoundException, Patch, ParseIntPipe, UnauthorizedException, ValidationPipe, UsePipes } from '@nestjs/common';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { SubscriberService } from '@client/subscribers/subscribers.service';
-import { SubscriberDTO } from '@client/subscribers/subscribers.dto';
+import { SubscriberDTO } from '@client/subscribers/dto/subscribers.dto';
 import { AuthGuard } from '@auth/auth.guard';
+import { CreateSubscriberDTO } from './dto/createSubscribers.dto';
+import { ResponseError, ResponseSuccess } from '@src/common/dto/response.dto';
+import { ResponseCode } from '@src/common/interfaces/responsecode.interface';
 
 @Controller('subscribers')
 export class SubscriberController {
@@ -32,11 +35,32 @@ export class SubscriberController {
     const clientId = req.user.sub;
     return await this.subscriberService.createSubscriber(subscriberDTO, clientId);
   }
-  @Post('register')
-  async registerSubscriber(@Body() subscriberDTO: SubscriberDTO): Promise<Subscriber> {
-    // Implement subscriber self-registration logic here
-    // You may need to validate the data before creating the subscriber
-    return await this.subscriberService.registerSubscriber(subscriberDTO, null);
+
+
+  @UsePipes(new ValidationPipe())
+  @Post('register/subscriber')
+  async registerSubscriber(@Body() subscriberData: CreateSubscriberDTO) {
+    const entity = Object.assign(new Subscriber(), subscriberData);
+
+    // check Subscriber exist 
+    const isSubscriberExists = await this.subscriberService.checkSubscriberExists(entity.email);
+    if (isSubscriberExists) {
+      return new ResponseError(ResponseCode.RESULT_USER_EXISTS, "This subscriber already exists. Please use a different email address or login.");
+    }
+
+    // create a new subscriber
+    try {
+      const subscriber = await this.subscriberService.createSubscriberVisitor(entity);
+
+      if (subscriber) {
+        return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, "A verification link has been sent to your email address. Please check your email to complete the registration.");
+      } else {
+        return new ResponseError(ResponseCode.RESULT_FAIL, "There was an issue sending the verification email. Please try again later.");
+      }
+
+    } catch (error) {
+      return new ResponseError(ResponseCode.RESULT_FAIL, "An error occurred during registration. Please try again.");
+    }
   }
 
   @Patch(':id')

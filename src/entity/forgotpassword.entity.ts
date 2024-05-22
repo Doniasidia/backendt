@@ -1,9 +1,10 @@
+//forgotpassword
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { Client } from '@admin/client/client.entity';
 
 @Entity()
-export class EmailVerification {
+export class ForgotPassword {
 
     @PrimaryGeneratedColumn()
     id: number;
@@ -21,7 +22,4 @@ export class EmailVerification {
 
     @Column()
     timestamp: Date;
-
-    @Column({ nullable: true })
-    email: string;
 }

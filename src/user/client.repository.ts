@@ -1,7 +1,7 @@
 // client.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { Client } from '@admin/client/client.entity';
 
 @Injectable()
@@ -21,5 +21,9 @@ export class ClientRepository {
 
   async save(client: Client): Promise<Client> {
     return this.clientRepository.save(client);
+  }
+
+  async update(client: Client): Promise<UpdateResult> {
+    return this.clientRepository.update(client.id, client);
   }
 }

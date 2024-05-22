@@ -3,14 +3,19 @@ import { PaymentMethod } from '@enums/paymentmethod';
 import { Status } from '@enums/status';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { Invoice } from '@client/invoices/invoices.entity';
+import { Client } from '@admin/client/client.entity';
 
 @Entity()
 export class Subscription {
   @PrimaryGeneratedColumn()
   id: number;
  
+  @Column({ type: 'decimal'})
+  amount: number;
   @Column()
-  amount: number; 
+  subscriberId?: number;
+  @Column({ nullable: true})
+  subscriberName : string;
   @Column()
   clientName: string;
   @Column({ nullable: true})
@@ -31,6 +36,7 @@ export class Subscription {
   @JoinColumn() 
   invoice: Invoice; 
  @Column({ type: "enum", enum: Status, default: Status.ACTIVATED })
-  status: Status;
-  
+  status: Status;
+    @ManyToOne(() => Client, client => client.invoices)
+  createdBy: Client;
 }

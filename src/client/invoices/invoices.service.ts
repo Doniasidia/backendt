@@ -1,22 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invoice } from './invoices.entity';
-import { InvoiceDto } from './invoices.dto';
-import { SubscriberService } from '@client/subscribers/subscribers.service';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { Group } from '@client/groups/groups.entity';
 import { Plan } from '@client/plans/plans.entity';
 import { Status } from '@enums/status';
-import { round } from 'lodash';
 import { Subscription } from '@client/subscriptions/subscription.entity';
 import { Client } from '@admin/client/client.entity';
-
-
+import { NotificationService } from '@client/notification/notification.service';
 
 @Injectable()
 export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
+
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
@@ -24,114 +22,164 @@ export class InvoiceService {
     private readonly subscriptionRepository: Repository<Subscription>,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
-    @InjectRepository(Group) 
+    @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(Subscriber)
     private readonly subscriberRepository: Repository<Subscriber>,
-    @InjectRepository(Client) 
-    private readonly clientRepository: Repository<Client>, // Inject the Client repository
+    @InjectRepository(Client)
+    private readonly clientRepository: Repository<Client>,
+    private readonly notificationService: NotificationService,
 
   ) {}
-  @Cron('* * * * * *', { timeZone: 'Europe/Paris' })
-  async generateInvoicesCron(): Promise<void> {
-    // Get all clients
-    const clients = await this.clientRepository.find();
 
-    // Loop through each client
+  @Cron('0 0 * * *', { timeZone: 'Africa/Tunis' })
+  async generateInvoicesCron(): Promise<void> {
+    const clients = await this.clientRepository.find();
     for (const client of clients) {
-      await this.generateInvoicesForNextMonth(client.id);
+      await this.generateInvoicesForSubscriptionsDueTomorrow(client.id);
+      await this.notificationService.sendReminderNotifications(client.id);
+
     }
   }
 
-  async findAll(): Promise<Invoice[]> {
-    return await this.invoiceRepository.find();
-  }
+  async generateInvoicesForSubscriptionsDueTomorrow(clientId: number): Promise<void> {
+    this.logger.log(`Generating invoices for subscriptions due tomorrow for client ID: ${clientId}`);
+    const activeSubscriptions = await this.getAllActiveSubscriptions(clientId);
+    this.logger.log(`Found ${activeSubscriptions.length} active subscriptions`);
 
-  async getAllActiveSubscriptions(clientId: number): Promise<Subscriber[]> {
-    // Get all active subscribers belonging to the client
-    return await this.subscriberRepository.find({ where: { id: clientId , status: Status.ACTIVATED } });
-}
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    this.logger.log(`Looking for subscriptions due on: ${tomorrow.toISOString().split('T')[0]}`);
 
+    for (const subscription of activeSubscriptions) {
+      this.logger.log(`Subscription ID ${subscription.id}: endDate - ${subscription.endDate}`);
 
-  async generateInvoicesForNextMonth(clientId: number): Promise<void> {
-    // Get all active subscribers belonging to the client
-    const activeSubscribers = await this.getAllActiveSubscriptions(clientId);
-  
-    // Loop through each active subscriber
-    for (const subscriber of activeSubscribers) {
-      // Check if the subscriber already has an invoice for the next month
-      const existingInvoice = await this.invoiceRepository.findOne({
-        where: {
-          subscriber: subscriber,
-          dueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1) // Due date for next month
+      if (!(subscription.endDate instanceof Date)) {
+        subscription.endDate = new Date(subscription.endDate);
+      }
+
+      if (isNaN(subscription.endDate.getTime())) {
+        this.logger.error(`Invalid endDate format for subscription ID: ${subscription.id}`);
+        continue;
+      }
+
+      const subscriptionEndDate = new Date(subscription.endDate);
+      subscriptionEndDate.setHours(0, 0, 0, 0);
+
+      this.logger.log(`Comparing endDate: ${subscriptionEndDate} with tomorrow: ${tomorrow}`);
+
+      if (subscriptionEndDate.getTime() === tomorrow.getTime()) {
+        this.logger.log(`Found subscription due tomorrow for subscription ID: ${subscription.id}`);
+        if (['annuel', 'mensuel', 'Par session'].includes(subscription.type)) {
+          const renewedSubscription = await this.renewSubscription(subscription, clientId);
+          this.logger.log(`Renewed subscription ID: ${renewedSubscription.id}`);
+          await this.generateInvoiceForSubscription(renewedSubscription, clientId);
         }
-      });
-  
-      // If there's no existing invoice, create a new one
-      if (!existingInvoice) {
-        const nextMonthInvoice = new Invoice();
-        const client = await this.clientRepository.findOne({ where: { id: clientId } });
-
-        nextMonthInvoice.subscriber = subscriber;
-        nextMonthInvoice.subscriberName = subscriber.firstname; // Assuming the name property exists in the Subscriber entity
-
-        // Set the amount based on the subscriber's plan or group's plan
-        if (subscriber.planId) {
-          // Fetch the plan from the database using the planId
-          const planOptions = { where: { id: subscriber.planId } };
-          const plan: Plan = await this.planRepository.findOne(planOptions);
-          if (plan) {
-            nextMonthInvoice.amount = round(plan.amount, 3).toString(); // Convert to string with desired precision
-          } else {
-            throw new Error(`Plan not found for subscriber with ID ${subscriber.id}`);
-          }
-        } else if (subscriber.groupId) {
-          // Fetch the group from the database using the groupId
-          const groupOptions = { where: { id: subscriber.groupId } };
-          const group: Group = await this.groupRepository.findOne(groupOptions);
-          if (group && group.planId) {
-            // Fetch the plan from the database using the planId of the group
-            const planOptions = { where: { id: group.planId } };
-            const plan: Plan = await this.planRepository.findOne(planOptions);
-            if (plan) {
-              nextMonthInvoice.amount = round(plan.amount, 3).toString(); // Convert to string with desired precision
-            } else {
-              throw new Error(`Plan not found for group with ID ${group.id}`);
-            }
-          } else {
-            throw new Error(`Plan not found for group with ID ${group.id}`);
-          }
-        }
-  
-        nextMonthInvoice.createdAt = new Date(); // Set the date of the invoice to the current date
-        nextMonthInvoice.dueDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1); // Due date for next month
-        nextMonthInvoice.createdBy = client;
-
-  
-        // Save the invoice
-        await this.invoiceRepository.save(nextMonthInvoice);
+      } else {
+        this.logger.log(`No subscription due tomorrow for subscription ID: ${subscription.id}`);
       }
     }
+  }
+
+  async renewSubscription(subscription: Subscription, clientId: number): Promise<Subscription> {
+    const client = await this.clientRepository.findOne({ where: { id: clientId } });
+
+    // Deactivate the old subscription
+    subscription.status = Status.DEACTIVATED;
+    await this.subscriptionRepository.save(subscription);
+
+    const newSubscription = new Subscription();
+    newSubscription.subscriberId = subscription.subscriberId;
+    newSubscription.clientName = subscription.clientName;
+    newSubscription.planName = subscription.planName;
+    newSubscription.type = subscription.type;
+    newSubscription.groupName = subscription.groupName;
+    newSubscription.amount = subscription.amount;
+
+    const startDate = new Date(subscription.endDate);
+    startDate.setDate(startDate.getDate() + 1);
+    newSubscription.startDate = startDate;
+
+    let endDate: Date;
+    switch (subscription.type) {
+      case 'annuel':
+        endDate = new Date(newSubscription.startDate);
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+      case 'mensuel':
+        endDate = new Date(newSubscription.startDate);
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+      case 'Par session':
+        endDate = new Date(newSubscription.startDate);
+        endDate.setDate(endDate.getDate() + 1);
+        break;
+      default:
+        throw new Error('Unsupported subscription type');
+    }
+
+    newSubscription.endDate = endDate;
+    newSubscription.status = Status.ACTIVATED;
+    newSubscription.createdBy = client;
+
+    this.logger.log(`Saving renewed subscription: ${JSON.stringify(newSubscription)}`);
+    return await this.subscriptionRepository.save(newSubscription);
+  }
+
+  async generateInvoiceForSubscription(subscription: Subscription, clientId: number): Promise<void> {
+    const client = await this.clientRepository.findOne({ where: { id: clientId } });
+
+    // Expire the old invoice
+    const oldInvoice = await this.invoiceRepository.findOne({
+      where: { subscription: { id: subscription.id } },
+    });
+    if (oldInvoice) {
+      oldInvoice.status = Status.EXPIRED;
+      await this.invoiceRepository.save(oldInvoice);
+    }
+
+    const newInvoice = new Invoice();
+    newInvoice.subscriberId = subscription.subscriberId;
+    newInvoice.subscriberName = subscription.subscriberName;
+    newInvoice.amount = subscription.amount;
+    newInvoice.createdAt = subscription.startDate;
+    newInvoice.dueDate = subscription.endDate;
+    newInvoice.status = Status.ACTIVATED;
+    newInvoice.createdBy = client;
+    newInvoice.clientName = subscription.clientName;
+
+    this.logger.log(`Generating invoice for subscription ID: ${subscription.id}`);
+    await this.invoiceRepository.save(newInvoice);
+  }
+
+  async getAllActiveSubscriptions(clientId: number): Promise<Subscription[]> {
+    this.logger.log(`Fetching active subscriptions for client ID: ${clientId}`);
+    return await this.subscriptionRepository.find({
+      where: {
+        createdBy: { id: clientId },
+        status: Status.ACTIVATED,
+      },
+    });
   }
 
   async findInvoicesByClientId(clientId: number): Promise<Invoice[]> {
     return await this.invoiceRepository.find({
       where: {
-        createdBy: { id: clientId }
-      }
+        createdBy: { id: clientId },
+      },
     });
   }
 
-  
   async findInvoicesBySubscriberId(subscriberId: number): Promise<Invoice[]> {
     return await this.invoiceRepository.find({
       where: {
-        subscriberId: subscriberId
-      }
+        subscriberId: subscriberId,
+      },
     });
   }
- 
 
-
- 
+  async findSubscriptionById(subscriptionId: number): Promise<Subscription> {
+    return await this.subscriptionRepository.findOne({ where: { id: subscriptionId } });
+  }
 }

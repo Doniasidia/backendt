@@ -17,8 +17,10 @@ export class Plan{
   @Column()
   type: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3 }) 
-  amount: number;
+  @Column({ type: 'decimal'})
+amount: number;
+
+  
 
   @Column({ type: 'time', nullable: true })
   duration: string;

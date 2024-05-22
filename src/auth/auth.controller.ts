@@ -1,11 +1,12 @@
 //auth.controller.ts
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards, BadRequestException, Param } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards, BadRequestException, Param, UsePipes, ValidationPipe, Patch } from '@nestjs/common';
 import { AuthGuard } from '@auth/auth.guard';
 import { AuthService } from '@auth/auth.service';
 import { SignInDto } from '@auth/signInDto';
 import { Role } from '@enums/role';
-import { ResponseSuccess } from '@src/common/dto/response.dto';
 import { ResponseCode } from '@src/common/interfaces/responsecode.interface';
+import { ResponseError, ResponseSuccess } from '@src/common/dto/response.dto';
+import * as bcrypt from 'bcrypt';
 
 @Controller('auth')
 export class AuthController {
@@ -34,38 +35,57 @@ export class AuthController {
     return req.user;
   }
 
-  @Get('email/verify/:token')
-  async verifyEmail(@Param('token') token: number): Promise<Object> {
+  @Get('subscriber/verify/:token')
+  async verifySubscriberEmail(@Param('token') token: number): Promise<Object> {
     try {
-      var isEmailVerified = await this.authService.verifyEmail(token);
+      var isEmailVerified = await this.authService.verifySubscriberEmail(token);
       return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, isEmailVerified);
     } catch (error) {
       return new ResponseSuccess(ResponseCode.RESULT_FAIL, error);
     }
   }
-  @Post('forgot-password')
-  async forgotPassword(@Body() body: { email: string }): Promise<{ message: string }> {
-    const { email } = body;
+
+  @Get('client/verify/:token')
+  async verifyClientEmail(@Param('token') token: number): Promise<Object> {
     try {
-      await this.authService.forgotPassword(email);
-      return { message: 'Password reset email sent successfully' };
+      var isEmailVerified = await this.authService.verifyClientEmail(token);
+      return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, isEmailVerified);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      return new ResponseSuccess(ResponseCode.RESULT_FAIL, error);
     }
   }
 
-  // AuthController - verifyEmail method
-
-// AuthController - verifyEmail method
-/*@Get('email/verifi/:token')
-async verifiEmail(@Param('token') token: number): Promise<Object> {
+  @Get('email/forgot-password/:email')
+  async sendEmailForgotPassword(@Param('email') email: string): Promise<Object> {
     try {
-        // Verify email token
-        const isEmailVerified = await this.authService.verifyEmail(token);
-        return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, isEmailVerified);
+      var isEmailSent = await this.authService.sendEmailForgotPassword(email);
+      if (isEmailSent) {
+        return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, null);
+      } else {
+        return new ResponseError(ResponseCode.RESULT_FAIL, "Email has not been sent");
+      }
     } catch (error) {
-        return new ResponseSuccess(ResponseCode.RESULT_FAIL, error);
-    }
-}
-  */
+      return new ResponseError(ResponseCode.RESULT_FAIL, "Error when sending email");
+    }
+  }
+
+  @Patch('subscriber/reset-password/:token')
+  async subscriberResetPassword(@Param('token') token: number, @Body() body: { password: string }) {
+    try {
+      await this.authService.subscriberResetPassword(token, body.password);
+      return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, null);
+    } catch (error) {
+      return new ResponseError(ResponseCode.RESULT_FAIL, "Unexpected error happen");
+    }
+  }
+
+  @Patch('client/reset-password/:token')
+  async clientResetPassword(@Param('token') token: number, @Body() body: { password: string }) {
+    try {
+      await this.authService.clientResetPassword(token, body.password);
+      return new ResponseSuccess(ResponseCode.RESULT_SUCCESS, null);
+    } catch (error) {
+      return new ResponseError(ResponseCode.RESULT_FAIL, "Unexpected error happen");
+    }
+  }
 }

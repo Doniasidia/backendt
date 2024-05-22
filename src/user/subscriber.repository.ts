@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 
 @Injectable()
@@ -24,4 +24,7 @@ export class SubscriberRepository {
     return this.subscriberRepository.save(subscriber);
   }
 
+  async update(subscriber: Subscriber): Promise<UpdateResult> {
+    return this.subscriberRepository.update(subscriber.id, subscriber);
+  }
 }

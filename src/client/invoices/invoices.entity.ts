@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { Client } from '@admin/client/client.entity';
 import { Subscription } from '@client/subscriptions/subscription.entity';
+import { Status } from '@enums/status';
 
 @Entity()
 export class Invoice {
@@ -10,11 +11,13 @@ export class Invoice {
 
   @Column()
   subscriberId: number;
-  @Column()
+  @Column({ nullable: true})
   subscriberName : string;
   @Column()
   clientName : string;
-  @Column()
+  @Column({ type: "enum", enum: Status, default: Status.ACTIVATED })
+  status: Status;
+  @Column({ type: 'decimal'})
   amount: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -28,6 +31,6 @@ export class Invoice {
   @ManyToOne(() => Client, client => client.invoices)
   createdBy: Client;
   @ManyToOne(() => Subscriber, subscriber => subscriber.invoices)
-  subscriber: Subscriber; 
+  subscriber: Subscriber; 
 
 }
