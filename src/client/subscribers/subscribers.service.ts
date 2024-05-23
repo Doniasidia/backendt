@@ -37,11 +37,27 @@ export class SubscriberService {
 
 
   async findSubscribersByClientId(clientId: number): Promise<Subscriber[]> {
-    return await this.subscriberRepository.find({
+    // Find subscribers created by the client
+    const createdByClient = await this.subscriberRepository.find({
       where: {
         createdBy: { id: clientId }
       }
     });
+  
+    // Find subscribers associated with the client through subscriptions
+    const associatedWithClient = await this.subscriberRepository.createQueryBuilder('subscriber')
+      .innerJoin('subscriber.clients', 'client', 'client.id = :clientId', { clientId })
+      .getMany();
+  
+    // Combine both arrays and remove duplicates
+    const combinedSubscribers = [...createdByClient, ...associatedWithClient];
+  
+    // Remove duplicates
+    const uniqueSubscribers = combinedSubscribers.filter((subscriber, index, self) =>
+      index === self.findIndex((s) => s.id === subscriber.id)
+    );
+  
+    return uniqueSubscribers;
   }
 
   async createSubscriber(subscriberDTO: SubscriberDTO, clientId: number): Promise<Subscriber> {

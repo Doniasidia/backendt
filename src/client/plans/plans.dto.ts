@@ -1,5 +1,5 @@
 //plans.dto
-import {  IsNotEmpty,  IsNumber,  IsString ,IsDate, IsOptional } from 'class-validator';
+import {  IsNotEmpty,  IsNumber,  IsString ,IsDate, IsOptional, IsDecimal } from 'class-validator';
 
 
 export class PlanDTO {
@@ -13,7 +13,6 @@ export class PlanDTO {
   type: string;
 
   @IsNotEmpty()
-  @IsNumber()
   amount: number;
   
 

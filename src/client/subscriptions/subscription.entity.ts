@@ -39,4 +39,5 @@ export class Subscription {
   status: Status;
     @ManyToOne(() => Client, client => client.invoices)
   createdBy: Client;
+  
 }

@@ -6,6 +6,8 @@ import { Subscription } from './subscription.entity';
 import { SubscriptionDTO } from './subscriptions.dto';
 import { Client } from '@admin/client/client.entity';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
+import { Invoice } from '@client/invoices/invoices.entity';
+import { InvoiceService } from '@client/invoices/invoices.service';
 
 @Injectable()
 export class SubscriptionService {
@@ -16,6 +18,8 @@ export class SubscriptionService {
     private readonly clientRepository: Repository<Client>,
     @InjectRepository(Subscriber)
     private readonly subscriberRepository: Repository<Subscriber>,
+    private readonly invoiceService: InvoiceService // Inject InvoiceService
+
   ) {}
 
   async findSubscriptionsBySubscriberId(subscriberId: number): Promise<Subscription[]> {
@@ -29,12 +33,15 @@ export class SubscriptionService {
 
 
   async createSubscription(subscriptionDTO: SubscriptionDTO): Promise<Subscription> {
-  
     const client = await this.clientRepository.findOne({ where: { id: subscriptionDTO.createdById } });
     if (!client) {
       throw new Error('Client not found');
     }
-    const subscriber = await this.subscriberRepository.findOne({ where: { id: subscriptionDTO.subscriberId } });
+    
+    const subscriber = await this.subscriberRepository.findOne({ 
+      where: { id: subscriptionDTO.subscriberId },
+      relations: ['clients'], // Ensure the clients relationship is loaded
+    });
     if (!subscriber) {
       throw new Error('Subscriber not found');
     }
@@ -51,10 +58,22 @@ export class SubscriptionService {
     newSubscription.groupName = subscriptionDTO.groupName;
     newSubscription.createdBy = client;
     newSubscription.subscriber = subscriber;
-
+  
     const savedSubscription = await this.subscriptionRepository.save(newSubscription);
+  
+    // Generate invoice for the newly created subscription
+    await this.invoiceService.generateInvoiceForSubscription(savedSubscription, subscriptionDTO.createdById);
+  
+    // Ensure the clients array is initialized
+    if (!subscriber.clients) {
+      subscriber.clients = [];
+    }
+  
+    if (!subscriber.clients.some(c => c.id === client.id)) {
+      subscriber.clients.push(client);
+      await this.subscriberRepository.save(subscriber);
+    }
+  
     return savedSubscription;
-  }
- 
- 
-}
+  }
+}  

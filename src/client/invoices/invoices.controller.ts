@@ -1,9 +1,10 @@
-import { BadRequestException, Controller, Get, Param, Post, Req, Request, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Req, Request, UseGuards } from '@nestjs/common';
 import { InvoiceService } from './invoices.service';
 import { Invoice } from './invoices.entity';
 import { Subscriber } from '@client/subscribers/subscribers.entity';
 import { AuthGuard } from '@auth/auth.guard';
 import { Subscription } from '@client/subscriptions/subscription.entity';
+import { SubscriptionDTO } from '@client/subscriptions/subscriptions.dto';
 
 @Controller('invoices')
 export class InvoiceController {
@@ -53,4 +54,5 @@ export class InvoiceController {
     await this.invoiceService.generateInvoicesForSubscriptionsDueTomorrow(parsedClientId);
     return { message: 'Invoices for subscriptions due tomorrow have been generated' };
   }
+  
 }

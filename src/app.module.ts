@@ -45,13 +45,15 @@ import { jwtConstants } from '@auth/constants';
 import { SubscriptionService } from '@client/subscriptions/subscriptions.service';
 import { SubscriptionController } from '@client/subscriptions/subscriptions.controller';
 import { Server } from 'socket.io';
-import { ChatGateway } from './chat/chat.gateway';
 import { EmailVerification } from '@entity/emailverification.entity';
 import { CommonModule } from './common/common.module';
 import { ForgotPassword } from '@entity/forgotpassword.entity';
 import { Notification } from '@client/notification/notification.entity';
 import { NotificationService } from '@client/notification/notification.service';
 import { NotificationController } from '@client/notification/notification.controller';
+import { ChatModule } from './messages/messages.module';
+import { Messages } from './messages/messages.entity';
+import { ChatService } from './messages/messages.service';
 
 
 
@@ -86,7 +88,7 @@ import { NotificationController } from '@client/notification/notification.contro
           EmailVerification,
           ForgotPassword,
           Notification,
-
+          Messages
         ],
         synchronize: true,
       }),
@@ -101,6 +103,7 @@ import { NotificationController } from '@client/notification/notification.contro
     AuthModule,
     UserModule,
     SubscriberModule,
+    ChatModule
   
   ],
   controllers: [
@@ -132,7 +135,7 @@ import { NotificationController } from '@client/notification/notification.contro
     PaiementsService,
     InvoiceService,
     SubscriptionService,
-    ChatGateway,
+  
     NotificationService,
   ],
 })

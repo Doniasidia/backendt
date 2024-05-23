@@ -54,7 +54,7 @@ export class AuthService {
                     throw new UnauthorizedException('User need to mail verify');
                 }
                 role = Role.SUBSCRIBER;
-                redirectTo = '/subs/abonnements'; // Redirect URL for subscribers
+                redirectTo = '/subs/abonnement'; // Redirect URL for subscribers
             } else {
                 // If user doesn't exist in subscriber repository, check client repository
                 user = await this.clientRepository.findOneByEmail(email);
